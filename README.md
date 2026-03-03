@@ -8,6 +8,7 @@ Claude Code skills for Nextflow and nf-core bioinformatics workflows, powered by
 |-------|-------------|
 | `nextflow-workflow-writer` | Create Nextflow pipelines by composing nf-core modules |
 | `run-nfcore-module` | Execute nf-core modules with proper configuration |
+| `nextflow-run-module` | Run Nextflow modules natively using `nextflow module` commands |
 | `install-nfcore-module` | Install nf-core modules into your project |
 | `container-provisioner` | Provision containers on-the-fly using Seqera Wave |
 
@@ -36,6 +37,7 @@ Once installed, use the skills with the `seqera:` namespace:
 ```bash
 /seqera:nextflow-workflow-writer
 /seqera:run-nfcore-module
+/seqera:nextflow-run-module
 /seqera:install-nfcore-module
 /seqera:container-provisioner
 ```
