@@ -1,5 +1,5 @@
 ---
-name: container-provisioner
+name: create-container
 description: Provision containers on-the-fly for conda software packages using Seqera Wave. Use when you need a container to run a bioinformatics tool provided by a conda package.
 allowed-tools: mcp__seqera__search_seqera_api, mcp__seqera__call_seqera_api
 ---

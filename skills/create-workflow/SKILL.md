@@ -1,10 +1,10 @@
 ---
-name: nextflow-workflow-writer
+name: create-workflow
 description: |
   INVOKE THIS SKILL IMMEDIATELY when user asks to: write/create/build a Nextflow pipeline or workflow,
   create any bioinformatics pipeline (RNA-seq, DNA-seq, variant calling, ChIP-seq, etc.),
   or compose/chain nf-core modules. This skill handles all Nextflow workflow creation tasks.
-allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill, mcp__seqera__search_nfcore_module, mcp__seqera__describe_nfcore_module
+allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill
 ---
 
 # Nextflow Workflow Writer
@@ -20,19 +20,19 @@ include { FASTQC } from './modules/nf-core/fastqc/main'
 workflow { FASTQC(Channel.fromPath('data/*.fq.gz')) }
 ```
 
-✅ **CORRECT** - Use the `run-nfcore-module` skill:
+✅ **CORRECT** - Use the `run-module` skill:
 ```
-Skill(skill="run-nfcore-module")
+Skill(skill="run-module")
 ```
 
-**The `run-nfcore-module` skill:**
-- Uses Seqera MCP to get proper inputs/parameters/config
-- Runs modules directly via `nextflow run modules/nf-core/<module>/main.nf`
+**The `run-module` skill:**
+- Uses `nextflow module search/info` to discover and get proper inputs/parameters
+- Runs modules directly via `nextflow module run nf-core/<module>`
 - No wrapper workflow needed
 
 **⚠️ When a module run fails due to missing args:**
 - DO NOT write a wrapper workflow as a "fix"
-- Instead: call `mcp__seqera__describe_nfcore_module` to get correct parameters
+- Instead: run `nextflow module info <module>` to get correct parameters
 - Fix the command-line arguments and re-run directly
 
 **Only write a workflow in Step 4** when composing multiple validated modules together.
@@ -43,8 +43,8 @@ Skill(skill="run-nfcore-module")
 
 ### Step 1: Identify Modules and Propose Plan
 
-1. Use `mcp__seqera__search_nfcore_module` to find nf-core modules for each processing step
-2. Use `mcp__seqera__describe_nfcore_module` to understand inputs/outputs of each module
+1. Use `nextflow module search <term>` to find nf-core modules for each processing step
+2. Use `nextflow module info <name>` to understand inputs/outputs of each module
 3. **Present a plan to the user** with:
    - List of identified modules
    - Processing sequence (which module runs first, second, etc.)
@@ -64,12 +64,11 @@ Skill(skill="run-nfcore-module")
 
 1. Determine appropriate **test data** for validation
 2. For EACH module in the plan, sequentially:
-   - **Install**: Invoke `Skill(skill="install-nfcore-module")`
-   - **Run with test data**: Invoke `Skill(skill="run-nfcore-module")`
+   - **Install and run with test data**: Invoke `Skill(skill="run-module")`
    - **Verify outputs** - confirm expected data is produced
    - Only proceed to next module after current one succeeds
 
-> **Note**: The `run-nfcore-module` skill uses Seqera MCP tools to get proper input/parameter configuration for each module.
+> **Note**: The `run-module` skill uses `nextflow module` commands for discovery, configuration, and execution — modules are installed on-the-fly.
 
 **DO NOT proceed to Step 4 until ALL modules have been individually validated.**
 
@@ -100,7 +99,6 @@ Only after ALL modules run successfully:
 ## Critical Guidelines
 
 ### Command Execution
-- ALWAYS add `-ansi-log false` to all `nextflow run` commands
 - Use `-resume` flag to leverage cached results when appropriate
 - Use absolute paths, never relative paths
 
@@ -111,8 +109,8 @@ Only after ALL modules run successfully:
 
 ### Module Selection
 - Prefer nf-core single-tool modules over sub-workflows
-- Do not write wrapper workflows to test single modules - use `Skill(skill="run-nfcore-module")` instead
-- Use `mcp__seqera__search_nfcore_module` to find modules, then `mcp__seqera__describe_nfcore_module` for details
+- Do not write wrapper workflows to test single modules - use `Skill(skill="run-module")` instead
+- Use `nextflow module search` to find modules, then `nextflow module info` for details
 
 ### Debugging Protocol
 1. Check the task work directory using the task ID from stdout
@@ -126,23 +124,20 @@ Only after ALL modules run successfully:
 
 | Task | Invoke Skill |
 |------|--------------|
-| Install a module | `Skill(skill="install-nfcore-module")` |
-| Run/test a single module | `Skill(skill="run-nfcore-module")` |
-| Create a custom container | `Skill(skill="container-provisioner")` |
+| Install/run/test a module | `Skill(skill="run-module")` |
+| Create a custom container | `Skill(skill="create-container")` |
 
 ### When to Delegate
 
-- **Step 3 (Validate Modules)**: Use `run-nfcore-module` skill for each module validation
-- **Installing modules**: Use `install-nfcore-module` skill instead of running `nf-core modules install` directly
-- **Custom environment needs**: Use `container-provisioner` skill for Wave container creation
+- **Step 3 (Validate Modules)**: Use `run-module` skill for each module validation
+- **Custom environment needs**: Use `create-container` skill for Wave container creation
 
 ### Example: Step 3 Validation
 
 For each module in your plan:
 ```
-1. Invoke: Skill(skill="install-nfcore-module") → install the module
-2. Invoke: Skill(skill="run-nfcore-module") → run with test data and verify outputs
-3. Only proceed to next module after success
+1. Invoke: Skill(skill="run-module") → install, run with test data, and verify outputs
+2. Only proceed to next module after success
 ```
 
 These skills contain detailed instructions for their specific tasks and ensure consistent execution patterns.

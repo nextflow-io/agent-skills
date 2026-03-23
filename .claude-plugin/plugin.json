@@ -1,12 +1,12 @@
 {
-  "name": "seqera",
+  "name": "nextflow",
   "description": "Nextflow and nf-core bioinformatics workflow skills powered by Seqera MCP",
   "version": "1.0.0",
   "author": {
-    "name": "Seqera",
-    "url": "https://seqera.io"
+    "name": "Nextflow",
+    "url": "https://nextflow.io"
   },
-  "repository": "https://github.com/seqeralabs/claude-plugin",
+  "repository": "https://github.com/nextflow-io/claude-plugin",
   "license": "Apache-2.0",
   "keywords": ["nextflow", "nf-core", "bioinformatics", "seqera", "workflows"]
 }
