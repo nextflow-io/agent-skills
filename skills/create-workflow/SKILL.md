@@ -16,7 +16,7 @@ Create complete Nextflow workflows by composing validated nf-core modules.
 ❌ **WRONG** - Writing a workflow to run one module:
 ```groovy
 // DO NOT DO THIS - not even when a module run fails!
-include { FASTQC } from './modules/nf-core/fastqc/main'
+include { FASTQC } from 'nf-core/fastqc'
 workflow { FASTQC(Channel.fromPath('data/*.fq.gz')) }
 ```
 
@@ -67,6 +67,8 @@ Skill(skill="run-module")
    - **Install and run with test data**: Invoke `Skill(skill="run-module")`
    - **Verify outputs** - confirm expected data is produced
    - Only proceed to next module after current one succeeds
+3. Log ALL module run commands and their outputs to a debug file with the `.modules-validation-` prefix
+4. If a command fails, stop and show the user the command used and the output generated before trying something else
 
 > **Note**: The `run-module` skill uses `nextflow module` commands for discovery, configuration, and execution — modules are installed on-the-fly.
 
@@ -83,10 +85,10 @@ Only after ALL modules run successfully:
    docker.enabled = true
    ```
 
-2. Write the workflow script compositing all validated steps:
+2. Write the workflow script compositing all validated steps using **Nextflow managed modules** (no `./` prefix — Nextflow automatically downloads and installs them from the registry):
    ```groovy
-   include { MODULE_A } from './modules/nf-core/module_a/main'
-   include { MODULE_B } from './modules/nf-core/module_b/main'
+   include { MODULE_A } from 'nf-core/module_a'
+   include { MODULE_B } from 'nf-core/module_b'
 
    workflow {
        MODULE_A(input_ch)
@@ -106,6 +108,10 @@ Only after ALL modules run successfully:
 - When specifying multiple files, separate with comma and wrap in double quotes: `--input "file1.fq,file2.fq"`
 - ALWAYS expand wildcards/globs to comma-separated file lists before running
 - Reference task IDs from stdout to locate output files in work directories
+
+### Module Include Syntax
+- `include { MOD } from 'nf-core/module'` — **Nextflow managed module** (default). Nextflow automatically downloads and installs it from the registry. Always prefer this form.
+- `include { MOD } from './modules/nf-core/module/main.nf'` — **Local file path**, resolved against the working directory. Only use when referencing locally modified modules.
 
 ### Module Selection
 - Prefer nf-core single-tool modules over sub-workflows

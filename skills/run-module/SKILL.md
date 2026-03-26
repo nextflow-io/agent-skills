@@ -15,7 +15,7 @@ Run modules natively using `nextflow module` commands. Everything is self-contai
 ❌ **WRONG** - Writing a wrapper workflow:
 ```groovy
 // NEVER DO THIS - even if the module fails!
-include { FASTQC } from './modules/nf-core/fastqc/main'
+include { FASTQC } from 'nf-core/fastqc'
 workflow { FASTQC(Channel.fromPath('*.fq.gz')) }
 ```
 
