@@ -54,7 +54,11 @@ This returns the module description, inputs, parameters, and the exact run comma
 
 ## Step 3: Configure the Module Registry
 
-Before running any module commands, ensure a `nextflow.config` file exists in the working directory with the module registry configured:
+Before running any module commands, two things must be configured:
+
+### Registry URL
+
+Ensure a `nextflow.config` file exists in the working directory with the module registry configured:
 
 ```groovy
 registry {
@@ -63,6 +67,26 @@ registry {
 ```
 
 If the file doesn't exist, create it. If it exists, add the `registry` block if not already present.
+
+### Registry Authentication
+
+The module registry requires an API token. Set the `NXF_REGISTRY_TOKEN` environment variable:
+
+```bash
+export NXF_REGISTRY_TOKEN='npr_pat_<your-token>'
+```
+
+Tokens are created at [registry.nextflow.io](https://registry.nextflow.io/) → **Access tokens** page. Without this token, all module commands (`search`, `info`, `run`) will fail with a 401 authentication error.
+
+Before running any module command, verify the env var is set:
+
+```bash
+# Check if token is configured
+if [ -z "$NXF_REGISTRY_TOKEN" ]; then
+  echo "ERROR: NXF_REGISTRY_TOKEN is not set. Module registry requires authentication."
+  echo "Get a token at https://registry.nextflow.io/ → Access tokens"
+fi
+```
 
 ## Step 4: Substitute Template Values and Run
 
@@ -143,7 +167,7 @@ nextflow module run nf-core/bwa/mem \
 
 1. **SEARCH FIRST** — Always use `nextflow module search` to find the right module
 2. **GET THE TEMPLATE** — Always run `nextflow module info` before running a module
-3. **CONFIGURE REGISTRY** — Ensure `nextflow.config` contains the `registry { url = 'https://registry-dev.nextflow.io/api' }` block
+3. **CONFIGURE REGISTRY** — Ensure `nextflow.config` contains the `registry { url = 'https://registry-dev.nextflow.io/api' }` block and `NXF_REGISTRY_TOKEN` is set
 4. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
 5. **NEVER write wrapper workflows** — If a run fails, use `nextflow module info` to get correct args
 6. **NEVER guess parameters** — Always get them from the info template
