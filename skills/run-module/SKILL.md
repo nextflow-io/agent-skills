@@ -52,19 +52,7 @@ nextflow module info nf-core/fastqc
 
 This returns the module description, inputs, parameters, and the exact run command template. Use this template as the basis for your run command.
 
-## Step 3: Configure the Module Registry
-
-Before running any module commands, ensure a `nextflow.config` file exists in the working directory with the module registry configured:
-
-```groovy
-registry {
-    url = 'https://registry-dev.nextflow.io/api'
-}
-```
-
-If the file doesn't exist, create it. If it exists, add the `registry` block if not already present.
-
-## Step 4: Substitute Template Values and Run
+## Step 3: Substitute Template Values and Run
 
 Replace placeholder values in the template with the user's concrete values (file paths, parameters), then execute. No explicit install is needed — modules are fetched on-the-fly:
 
@@ -126,31 +114,28 @@ nextflow module run nf-core/bwa/mem \
    nextflow module info nf-core/fastqc
    ```
 
-3. **Configure** the module registry in `nextflow.config` (if not already done)
+3. **Substitute** template placeholders with actual values from the user's data
 
-4. **Substitute** template placeholders with actual values from the user's data
-
-5. **Run** the module:
+4. **Run** the module:
    ```bash
    nextflow module run nf-core/fastqc \
      --input "data/sample.fq.gz" \
      --outdir results
    ```
 
-6. **Process output** — Read the stdout, summarize key results, and suggest the logical next step to the user
+5. **Process output** — Read the stdout, summarize key results, and suggest the logical next step to the user
 
 ## Critical Rules
 
 1. **SEARCH FIRST** — Always use `nextflow module search` to find the right module
 2. **GET THE TEMPLATE** — Always run `nextflow module info` before running a module
-3. **CONFIGURE REGISTRY** — Ensure `nextflow.config` contains the `registry { url = 'https://registry-dev.nextflow.io/api' }` block
-4. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
-5. **NEVER write wrapper workflows** — If a run fails, use `nextflow module info` to get correct args
-6. **NEVER guess parameters** — Always get them from the info template
-7. **Expand wildcards first** — Use `ls data/*.fq` then comma-separate results
-8. **Quote multi-file inputs** — `--input "file1,file2,file3"`
-9. **Use absolute paths** when possible
-10. **ALWAYS PROCESS STDOUT OUTPUT** — After a successful run, present a summary and suggest the logical next step
+3. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
+4. **NEVER write wrapper workflows** — If a run fails, use `nextflow module info` to get correct args
+5. **NEVER guess parameters** — Always get them from the info template
+6. **Expand wildcards first** — Use `ls data/*.fq` then comma-separate results
+7. **Quote multi-file inputs** — `--input "file1,file2,file3"`
+8. **Use absolute paths** when possible
+9. **ALWAYS PROCESS STDOUT OUTPUT** — After a successful run, present a summary and suggest the logical next step
 
 ## When Module Run Fails
 
@@ -161,7 +146,7 @@ nextflow module run nf-core/bwa/mem \
 3. Fix your `nextflow module run` command with correct arguments
 4. Re-run the corrected command
 
-## Step 5: Process Run Output (MANDATORY)
+## Step 4: Process Run Output (MANDATORY)
 
 The `nextflow module run` command prints its output to stdout. After a module run, you MUST:
 
