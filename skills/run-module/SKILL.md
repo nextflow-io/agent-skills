@@ -19,13 +19,13 @@ include { FASTQC } from 'nf-core/fastqc'
 workflow { FASTQC(Channel.fromPath('*.fq.gz')) }
 ```
 
-✅ **CORRECT** - Use `nextflow module info` to get the correct parameters:
+✅ **CORRECT** - Use `nextflow module view` to get the correct parameters:
 ```bash
-nextflow module info nf-core/fastqc
+nextflow module view nf-core/fastqc
 ```
 
 **When a module run fails:**
-1. Run `nextflow module info <module>` to get the command template
+1. Run `nextflow module view <module>` to get the command template
 2. Fix the arguments based on the template
 3. Re-run with `nextflow module run <module> ...`
 
@@ -47,7 +47,7 @@ nextflow module search "BAM statistics"
 Once you've identified the module, get its detailed info and the command template:
 
 ```bash
-nextflow module info nf-core/fastqc
+nextflow module view nf-core/fastqc
 ```
 
 This returns the module description, inputs, parameters, and the exact run command template. Use this template as the basis for your run command.
@@ -67,7 +67,7 @@ nextflow module run nf-core/fastqc \
 | Command | Description |
 |---------|-------------|
 | `nextflow module search <term>` | Similarity search by name/description/feature |
-| `nextflow module info <name>` | Detailed info and run command template |
+| `nextflow module view <name>` | Detailed info about the module and how to run it |
 | `nextflow module run <name> [options]` | Run a module (installed on-the-fly) |
 | `nextflow module list` | List available modules |
 
@@ -79,7 +79,7 @@ nextflow module run nf-core/fastqc \
 nextflow module search "quality control"
 
 # 2. Get the template
-nextflow module info nf-core/fastqc
+nextflow module view nf-core/fastqc
 
 # 3. Run with concrete values
 nextflow module run nf-core/fastqc \
@@ -93,7 +93,7 @@ nextflow module run nf-core/fastqc \
 nextflow module search "bwa alignment"
 
 # 2. Get the template
-nextflow module info nf-core/bwa/mem
+nextflow module view nf-core/bwa/mem
 
 # 3. Run with concrete values
 nextflow module run nf-core/bwa/mem \
@@ -111,7 +111,7 @@ nextflow module run nf-core/bwa/mem \
 
 2. **Get info** and run template:
    ```bash
-   nextflow module info nf-core/fastqc
+   nextflow module view nf-core/fastqc
    ```
 
 3. **Substitute** template placeholders with actual values from the user's data
@@ -128,9 +128,9 @@ nextflow module run nf-core/bwa/mem \
 ## Critical Rules
 
 1. **SEARCH FIRST** — Always use `nextflow module search` to find the right module
-2. **GET THE TEMPLATE** — Always run `nextflow module info` before running a module
+2. **GET THE TEMPLATE** — Always run `nextflow module view` before running a module
 3. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
-4. **NEVER write wrapper workflows** — If a run fails, use `nextflow module info` to get correct args
+4. **NEVER write wrapper workflows** — If a run fails, use `nextflow module view` to get correct args
 5. **NEVER guess parameters** — Always get them from the info template
 6. **Expand wildcards first** — Use `ls data/*.fq` then comma-separate results
 7. **Quote multi-file inputs** — `--input "file1,file2,file3"`
@@ -141,7 +141,7 @@ nextflow module run nf-core/bwa/mem \
 
 **DO NOT write a wrapper workflow.** Instead:
 
-1. Run `nextflow module info nf-core/<module>`
+1. Run `nextflow module view nf-core/<module>`
 2. Compare the template with your command to find discrepancies
 3. Fix your `nextflow module run` command with correct arguments
 4. Re-run the corrected command
