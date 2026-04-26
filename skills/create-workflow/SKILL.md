@@ -131,12 +131,10 @@ Only after ALL modules run successfully:
 | Task | Invoke Skill |
 |------|--------------|
 | Install/run/test a module | `Skill(skill="run-module")` |
-| Create a custom container | `Skill(skill="create-container")` |
 
 ### When to Delegate
 
 - **Step 3 (Validate Modules)**: Use `run-module` skill for each module validation
-- **Custom environment needs**: Use `create-container` skill for Wave container creation
 
 ### Example: Step 3 Validation
 

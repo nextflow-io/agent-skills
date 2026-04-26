@@ -9,7 +9,6 @@ Claude Code skills for Nextflow and nf-core bioinformatics workflows, powered by
 | `create-workflow` | Create Nextflow pipelines by composing nf-core modules |
 | `run-module` | Run Nextflow modules natively using `nextflow module` commands |
 | `launch-workflow` | Launch workflow executions on Seqera Platform |
-| `create-container` | Provision containers on-the-fly using Seqera Wave |
 
 ## Installation
 
@@ -37,7 +36,6 @@ Once installed, use the skills with the `nextflow:` namespace:
 /nextflow:create-workflow
 /nextflow:run-module
 /nextflow:launch-workflow
-/nextflow:create-container
 ```
 
 ## Local Development
