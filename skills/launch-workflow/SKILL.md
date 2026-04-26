@@ -1,16 +1,23 @@
 ---
 name: launch-workflow
-description: Launch Nextflow workflow executions on Seqera Platform. Use when the user wants to run/launch/submit a pipeline on Seqera Platform, select a compute environment, or sign in to Platform.
+description: Launch Nextflow pipeline executions on cloud and HPC clusters via Seqera Platform. Use when the user wants to run/launch/submit a pipeline on a cloud or cluster compute environment, configure a compute environment, push pipeline changes to GitHub before launching, or sign in to Seqera Platform.
 allowed-tools: Bash, Read, Glob, mcp__seqera__search_seqera_api, mcp__seqera__call_seqera_api
 ---
 
-# Launch Workflow on Seqera Platform
+# Launch Pipeline on Seqera Platform
 
-Launch Nextflow workflow executions on Seqera Platform. Requires a Seqera Platform account.
+Launch Nextflow pipeline executions on cloud (AWS, Google Cloud, Azure) and HPC clusters (Slurm, LSF, etc.) through Seqera Platform. Seqera Platform manages the target compute environment, executes the pipeline from a remote Git repository, and provides monitoring.
+
+## Main Flow
+
+1. **Configure the compute environment** — select a Seqera Platform compute environment for the target cloud or cluster.
+2. **Ensure the pipeline is in a remote Git repository** — Seqera Platform launches pipelines from GitHub (or a compatible Git host such as GitLab or Bitbucket). If the local pipeline is not yet hosted, assist the user in setting up the repository.
+3. **Upload local changes** — push any uncommitted local changes to the remote so the launched run reflects the user's current code.
+4. **Launch with `nextflow launch`** — submit the pipeline by passing the Git repository URL and the expected parameters.
 
 ## Step 1: Authenticate with Seqera Platform
 
-Check if the user is already authenticated:
+Check whether the user is already authenticated:
 
 ```bash
 nextflow auth list
@@ -24,7 +31,7 @@ nextflow auth login
 
 This opens a browser for authentication. Wait for the user to complete the login flow before proceeding.
 
-## Step 2: Select the Target Compute Environment
+## Step 2: Configure the Compute Environment
 
 List available compute environments using the Seqera API:
 
@@ -36,66 +43,104 @@ call_seqera_api(
 )
 ```
 
-**Selecting the best compute environment:**
+Selecting the compute environment:
 
-1. **Prefer Seqera Scheduler** — Always prefer compute environments that use Seqera Scheduler over other schedulers (e.g., AWS Batch, Slurm, Google Batch). Seqera Scheduler provides optimized resource allocation and cost efficiency.
-2. If multiple Seqera Scheduler CEs exist, ask the user which one to use.
-3. If no Seqera Scheduler CE is available, present the available options and let the user choose.
-4. Present the selected CE to the user for confirmation before launching.
+1. Present the available compute environments to the user (name, platform type, region/cluster).
+2. If multiple environments are available, ask the user which one to use.
+3. If only one is available, propose it and ask for confirmation.
+4. Confirm the selected compute environment with the user before launching.
 
-## Step 3: Launch the Workflow
+## Step 3: Ensure the Pipeline Is in a Remote Git Repository
 
-Use `nextflow launch` to submit the workflow to Seqera Platform:
+Seqera Platform launches pipelines from a remote Git URL — it cannot launch directly from a local path. Verify the pipeline directory is a Git repository connected to a remote on GitHub (or a compatible host like GitLab or Bitbucket).
+
+Check the current state:
 
 ```bash
-nextflow launch <pipeline> [options]
+git remote -v
+git status
 ```
 
-### Common launch patterns
+**If the pipeline is not yet a Git repository or has no remote**, assist the user in setting it up:
+
+1. Initialize the repository if needed:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial pipeline commit"
+   ```
+2. Help the user create a remote repository (e.g., on GitHub via `gh repo create`) or ask for an existing remote URL.
+3. Add the remote and push:
+   ```bash
+   git remote add origin <repo-url>
+   git push -u origin main
+   ```
+
+## Step 4: Upload Local Changes
+
+Before launching, push any local changes so the remote reflects the code that should run:
+
+```bash
+git status
+git add <files>
+git commit -m "<message>"
+git push
+```
+
+If the working tree is clean and the local branch is in sync with the remote, skip this step.
+
+## Step 5: Launch the Pipeline
+
+Use `nextflow launch` with the Git repository URL and parameters:
+
+```bash
+nextflow launch <git-repo-url> \
+  -r <revision> \
+  --input <input> \
+  --outdir <outdir> \
+  [additional --params...]
+```
+
+### Examples
+
+**Launch a pipeline from GitHub:**
+```bash
+nextflow launch https://github.com/org/pipeline \
+  -r main \
+  --input samplesheet.csv \
+  --outdir s3://bucket/results
+```
 
 **Launch an nf-core pipeline:**
 ```bash
-nextflow launch nf-core/rnaseq \
+nextflow launch https://github.com/nf-core/rnaseq \
   -r 3.14.0 \
   --input samplesheet.csv \
   --outdir s3://bucket/results \
   --genome GRCh38
 ```
 
-**Launch a custom pipeline from GitHub:**
-```bash
-nextflow launch github.com/org/pipeline \
-  -r main \
-  --input samplesheet.csv \
-  --outdir s3://bucket/results
-```
-
-**Launch a local pipeline:**
-```bash
-nextflow launch main.nf \
-  --input samplesheet.csv \
-  --outdir s3://bucket/results
-```
-
 ### Key options
 
 | Option | Description |
 |--------|-------------|
-| `-r <revision>` | Pipeline version/branch/tag |
+| `-r <revision>` | Pipeline version, branch, or tag |
 | `--input` | Input samplesheet or data |
-| `--outdir` | Output directory (typically cloud storage) |
+| `--outdir` | Output directory (cloud storage when running on cloud CEs) |
 | `-params-file params.yml` | Parameters file |
 | `-resume` | Resume a previous execution |
 
-## Step 4: Monitor the Execution
+## Step 6: Monitor the Execution
 
-After launching, `nextflow launch` returns a run URL on Seqera Platform. Present this URL to the user so they can monitor progress in the Platform UI.
+`nextflow launch` returns a run URL on Seqera Platform. Present this URL to the user so they can monitor progress in the Platform UI.
 
 ## Critical Rules
 
-1. **ALWAYS authenticate first** — Check `nextflow auth list` before attempting to launch
-2. **PREFER Seqera Scheduler** — When selecting a compute environment, always prefer CEs using Seqera Scheduler
-3. **CONFIRM before launching** — Always show the user the full launch command and selected CE before executing
-4. **USE cloud storage for outdir** — When launching on Platform, `--outdir` should point to cloud storage (s3://, gs://, az://), not local paths
-5. **SPECIFY a revision** — Always use `-r` to pin a specific pipeline version for reproducibility
-6. **PRESENT the run URL** — After a successful launch, show the Platform URL so the user can monitor the run
+1. **AUTHENTICATE first** — check `nextflow auth list` before attempting to launch.
+2. **CONFIRM the compute environment** — always show the user the selected CE before launching.
+3. **REQUIRE a remote Git repository** — the pipeline must be hosted on GitHub or a compatible Git host. If not, help the user set it up before launching.
+4. **PUSH local changes first** — the launched run uses the remote code, so local edits must be committed and pushed.
+5. **PASS the Git repository URL** to `nextflow launch`, not a local path.
+6. **PIN the revision** — always use `-r` to target a specific branch, tag, or commit for reproducibility.
+7. **USE cloud storage for `--outdir`** when the target CE runs on a cloud platform (s3://, gs://, az://).
+8. **PRESENT the run URL** returned by `nextflow launch` so the user can monitor the run.
