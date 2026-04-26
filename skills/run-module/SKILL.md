@@ -62,6 +62,18 @@ nextflow module run nf-core/fastqc \
   --outdir results
 ```
 
+### Container Provisioning with Wave + Conda
+
+Modules require containers for their underlying tools. Configure `nextflow.config` to use Wave + Conda so containers are provisioned on-the-fly from each module's conda packages:
+
+```groovy
+wave.enabled = true
+wave.strategy = 'conda,container'
+docker.enabled = true
+```
+
+This avoids the need to manually build or pull container images — Wave provisions them from the module's declared conda dependencies.
+
 ## Commands Reference
 
 | Command | Description |
