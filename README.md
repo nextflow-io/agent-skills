@@ -49,7 +49,7 @@ claude --plugin-dir /path/to/claude-plugin
 ## Requirements
 
 - [Claude Code](https://claude.ai/code) CLI
-- [Nextflow](https://nextflow.io) (for running workflows)
+- [Nextflow](https://nextflow.io) **26.04.0 or later** (required for `nextflow module` and `nextflow auth`/`nextflow launch` commands)
 
 ## License
 

@@ -8,6 +8,8 @@ allowed-tools: Bash, Read, Glob
 
 Run modules natively using `nextflow module` commands. Everything is self-contained — no external tools or MCP needed. Modules are installed on-the-fly when run.
 
+**Requires Nextflow 26.04.0 or later** (for the `nextflow module` commands).
+
 ## ⛔ NEVER WRITE WRAPPER WORKFLOWS
 
 **If a module fails due to missing arguments or incorrect parameters:**

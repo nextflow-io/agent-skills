@@ -11,6 +11,8 @@ allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill
 
 Create complete Nextflow workflows by composing validated nf-core modules.
 
+**Requires Nextflow 26.04.0 or later** (for the `nextflow module` commands used during validation).
+
 **NEVER write a wrapper workflow just to run/test a single nf-core module.**
 
 ❌ **WRONG** - Writing a workflow to run one module:
