@@ -6,6 +6,7 @@ Claude Code skills for Nextflow and nf-core bioinformatics workflows, powered by
 
 | Skill | Description |
 |-------|-------------|
+| `install-nextflow` | Install or upgrade Nextflow (and Java 17+ via SDKMAN if needed) |
 | `create-workflow` | Create Nextflow pipelines by composing nf-core modules |
 | `run-module` | Run Nextflow modules natively using `nextflow module` commands |
 | `launch-workflow` | Launch workflow executions on Seqera Platform |
@@ -33,6 +34,7 @@ When prompted, approve the Seqera MCP server connection to enable the skills.
 Once installed, use the skills with the `nextflow:` namespace:
 
 ```bash
+/nextflow:install-nextflow
 /nextflow:create-workflow
 /nextflow:run-module
 /nextflow:launch-workflow
