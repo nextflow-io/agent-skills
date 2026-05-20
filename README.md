@@ -23,6 +23,14 @@ Pick the skills you want and the coding agents you want to install them on. The 
 
 For skills that require the Seqera MCP (e.g. `launch-workflow`), make sure the [Seqera MCP server](https://mcp.seqera.io/mcp) is configured for your agent.
 
+## Local Development
+
+To test the plugin locally without installing:
+
+```bash
+claude --plugin-dir /path/to/claude-plugin
+```
+
 ## Requirements
 
 - A coding agent that supports agent skills (e.g. Claude Code, Codex, Cursor)
