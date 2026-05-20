@@ -8,7 +8,7 @@ allowed-tools: Bash, Read, Glob, mcp__seqera__search_seqera_api, mcp__seqera__ca
 
 Launch Nextflow pipeline executions on cloud (AWS, Google Cloud, Azure) and HPC clusters (Slurm, LSF, etc.) through Seqera Platform. Seqera Platform manages the target compute environment, executes the pipeline from a remote Git repository, and provides monitoring.
 
-**Requires Nextflow 26.04.0 or later** (for the `nextflow auth` and `nextflow launch` commands).
+**Requires Nextflow 26.04 or later** (for the `nextflow auth` and `nextflow launch` commands).
 
 ## Main Flow
 

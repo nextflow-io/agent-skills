@@ -6,7 +6,7 @@ allowed-tools: Bash, Read
 
 # Install or Upgrade Nextflow
 
-Install Nextflow (or upgrade an existing installation) and ensure the Java prerequisite is in place. The plugin requires **Nextflow 26.04.0 or later**.
+Install Nextflow (or upgrade an existing installation) and ensure the Java prerequisite is in place.
 
 ## Step 1: Check Whether Nextflow Is Installed
 
@@ -22,7 +22,7 @@ command -v nextflow && nextflow -version
 If Nextflow is already installed:
 
 1. Read the installed version from `nextflow -version`.
-2. If the installed version is **older than 26.04.0**, the user MUST upgrade — this plugin's skills depend on it.
+2. If the installed version is **older than 26.04**, the user MUST upgrade — other Nextflow skills depend on it.
 3. Otherwise, propose an upgrade only if a newer version is available.
 
 Run a self-update (it checks the latest release and updates if newer):
@@ -118,7 +118,7 @@ Common alternatives are `/usr/local/bin/` (may need `sudo`) or any directory alr
 nextflow -version
 ```
 
-Confirm the reported version is **26.04.0 or later**. Present the version to the user.
+Confirm the reported version is **26.04 or later**. Present the version to the user.
 
 ## Nextflow Versioning
 
@@ -127,9 +127,9 @@ Confirm the reported version is **26.04.0 or later**. Present the version to the
 Stable Nextflow releases use **calendar versioning** in the form `YY.MM.PATCH`:
 
 - `25.10.1` — patch 1 of the October 2025 release
-- `26.04.0` — first release of April 2026
+- `26.04` — first release of April 2026
 
-Compare versions as calendar dates, not semver — `26.04.0` is newer than `25.10.1`.
+Compare versions as calendar dates, not semver — `26.04` is newer than `25.10.1`.
 
 ### Edge releases
 
@@ -160,11 +160,11 @@ When the user asks to install or run a specific version, set `NXF_VER` rather th
 ## Critical Rules
 
 1. **CHECK FIRST** — always run `nextflow -version` before deciding to install or upgrade.
-2. **REQUIRE 26.04.0+** — the plugin's other skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version.
+2. **REQUIRE 26.04+** — other Nextflow skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version.
 3. **VERIFY JAVA 17+** before installing Nextflow — install Java 21 via SDKMAN if missing or too old.
 4. **CONFIRM destructive actions** — ask the user before running `nextflow self-update`, installing SDKMAN, or moving the `nextflow` launcher to a system directory.
 5. **PREFER curl, FALL BACK to wget** — if neither is available, stop and ask the user to install one.
 6. **REMEMBER stderr** — `java -version` writes to stderr; redirect with `2>&1` when parsing.
 7. **VERIFY at the end** — always run `nextflow -version` after install/upgrade to confirm the result.
 8. **USE NXF_VER for pinning** — when the user asks for a specific Nextflow version, set `NXF_VER` instead of reinstalling.
-9. **TREAT versions as calendar dates** — Nextflow uses `YY.MM.PATCH`, not semver, so `26.04.0` is newer than `25.10.1`.
+9. **TREAT versions as calendar dates** — Nextflow uses `YY.MM.PATCH`, not semver, so `26.04` is newer than `25.10.1`.
