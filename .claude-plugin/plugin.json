@@ -9,6 +9,7 @@
   "repository": "https://github.com/nextflow-io/agent-skills",
   "license": "Apache-2.0",
   "keywords": ["nextflow", "nf-core", "bioinformatics", "seqera", "workflows"],
+  "hooks": "./hooks/hooks.json",
   "skills": [
     "./skills/create-workflow/SKILL.md",
     "./skills/install-nextflow/SKILL.md",

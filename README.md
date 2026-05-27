@@ -11,6 +11,10 @@ Agent skills for Nextflow and nf-core bioinformatics workflows.
 - [`run-module`](./skills/run-module) — Run Nextflow modules natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch workflow executions on Seqera Platform
 
+## Hooks
+
+- **nextflow lint** — a `PostToolUse` hook runs `nextflow lint` on any `.nf` or `.config` file Claude writes or edits, feeding errors back so they get fixed automatically. Requires `nextflow` on `PATH`; it skips silently if Nextflow isn't installed.
+
 ## Installation
 
 Install the skills with [`skills.sh`](https://skills.sh):
