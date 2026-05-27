@@ -1,0 +1,14 @@
+{
+  "name": "nextflow-io-claude-plugin",
+  "owner": {
+    "name": "Nextflow",
+    "url": "https://nextflow.io"
+  },
+  "plugins": [
+    {
+      "name": "nextflow",
+      "source": "./",
+      "description": "Nextflow and nf-core bioinformatics workflow skills powered by Seqera MCP"
+    }
+  ]
+}
