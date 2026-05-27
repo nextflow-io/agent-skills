@@ -1,0 +1,39 @@
+name: Validate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Validate plugin manifest
+        run: claude plugin validate .claude-plugin/plugin.json --strict
+      - name: Validate marketplace manifest
+        if: hashFiles('.claude-plugin/marketplace.json') != ''
+        run: claude plugin validate .claude-plugin/marketplace.json --strict
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck hook scripts
+        run: |
+          shopt -s nullglob
+          scripts=(hooks/scripts/*.sh)
+          if [ ${#scripts[@]} -eq 0 ]; then
+            echo "No hook scripts to check."
+            exit 0
+          fi
+          shellcheck "${scripts[@]}"
