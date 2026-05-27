@@ -23,6 +23,15 @@ Pick the skills you want and the coding agents you want to install them on. The 
 
 For skills that require the Seqera MCP (e.g. `launch-workflow`), make sure the [Seqera MCP server](https://mcp.seqera.io/mcp) is configured for your agent.
 
+### Claude Code plugin marketplace
+
+This repo is also a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugins). Add it and install the `nextflow` plugin from within Claude Code:
+
+```
+/plugin marketplace add nextflow-io/claude-plugin
+/plugin install nextflow@nextflow
+```
+
 ## Local Development
 
 To test the plugin locally without installing:
