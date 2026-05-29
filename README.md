@@ -1,8 +1,8 @@
 # Nextflow Agent Skills
 
-[![skills.sh](https://skills.sh/b/nextflow-io/agent-skills)](https://skills.sh/nextflow-io/agent-skills)
-
 Agent skills for Nextflow and nf-core bioinformatics workflows.
+
+These skills follow the [Agent Skills](https://agentskills.io/specification) specification, so they can be used by any skills-compatible agent, including Claude Code, Codex CLI, OpenCode, and Cursor.
 
 ## Skills
 
@@ -13,15 +13,37 @@ Agent skills for Nextflow and nf-core bioinformatics workflows.
 
 ## Installation
 
-Install the skills with [`skills.sh`](https://skills.sh):
+### Claude Code
+
+```
+
+/plugin marketplace add nextflow-io/agent-skills
+/plugin install nextflow@nextflow-io-agent-skills
+```
+
+When prompted, approve the Seqera MCP server connection to enable the skills. Claude Code automatically keeps your skills up to date.
+
+### GitHub CLI
+
+If you use the [GitHub CLI](https://cli.github.com/) (v2.90.0+), you can install skills with [`gh skill`](https://github.blog/changelog/2026-04-16-manage-agent-skills-with-github-cli/):
 
 ```bash
-npx skills@latest add nextflow-io/agent-skills
+gh skill install nextflow-io/agent-skills
 ```
 
 Pick the skills you want and the coding agents you want to install them on. The installer supports Claude Code, Codex, Cursor, and other agents that follow the skills convention.
 
 For skills that require the Seqera MCP (e.g. `launch-workflow`), make sure the [Seqera MCP server](https://mcp.seqera.io/mcp) is configured for your agent.
+
+You can update installed skills using `gh skill update`:
+
+```bash
+# Check for updates interactively
+gh skill update
+
+# Update all installed skills
+gh skill update --all
+```
 
 ## Local Development
 

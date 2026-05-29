@@ -127,9 +127,9 @@ Confirm the reported version is **26.04 or later**. Present the version to the u
 Stable Nextflow releases use **calendar versioning** in the form `YY.MM.PATCH`:
 
 - `25.10.1` — patch 1 of the October 2025 release
-- `26.04` — first release of April 2026
+- `26.04.0` — first release of April 2026
 
-Compare versions as calendar dates, not semver — `26.04` is newer than `25.10.1`.
+Compare versions as calendar dates, not semver — `26.04.0` is newer than `25.10.1`.
 
 ### Edge releases
 
@@ -167,4 +167,4 @@ When the user asks to install or run a specific version, set `NXF_VER` rather th
 6. **REMEMBER stderr** — `java -version` writes to stderr; redirect with `2>&1` when parsing.
 7. **VERIFY at the end** — always run `nextflow -version` after install/upgrade to confirm the result.
 8. **USE NXF_VER for pinning** — when the user asks for a specific Nextflow version, set `NXF_VER` instead of reinstalling.
-9. **TREAT versions as calendar dates** — Nextflow uses `YY.MM.PATCH`, not semver, so `26.04` is newer than `25.10.1`.
+9. **TREAT versions as calendar dates** — Nextflow uses `YY.MM.PATCH`, not semver, so `26.04.0` is newer than `25.10.1`.
