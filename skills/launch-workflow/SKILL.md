@@ -22,7 +22,7 @@ Launch Nextflow pipeline executions on cloud (AWS, Google Cloud, Azure) and HPC 
 Check whether the user is already authenticated:
 
 ```bash
-nextflow auth list
+nextflow auth status
 ```
 
 If not authenticated, sign in:
@@ -138,7 +138,7 @@ nextflow launch https://github.com/nf-core/rnaseq \
 
 ## Critical Rules
 
-1. **AUTHENTICATE first** — check `nextflow auth list` before attempting to launch.
+1. **AUTHENTICATE first** — check `nextflow auth status` before attempting to launch.
 2. **CONFIRM the compute environment** — always show the user the selected CE before launching.
 3. **REQUIRE a remote Git repository** — the pipeline must be hosted on GitHub or a compatible Git host. If not, help the user set it up before launching.
 4. **PUSH local changes first** — the launched run uses the remote code, so local edits must be committed and pushed.
