@@ -1,0 +1,17 @@
+{
+  "name": "nextflow-io-claude-plugin",
+  "owner": {
+    "name": "Nextflow",
+    "url": "https://nextflow.io"
+  },
+  "metadata": {
+    "description": "Claude Code skills and hooks for Nextflow and nf-core bioinformatics workflows, powered by the Seqera MCP server."
+  },
+  "plugins": [
+    {
+      "name": "nextflow",
+      "source": "./",
+      "description": "Nextflow and nf-core bioinformatics workflow skills powered by Seqera MCP"
+    }
+  ]
+}
