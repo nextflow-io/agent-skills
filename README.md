@@ -45,6 +45,10 @@ gh skill update
 gh skill update --all
 ```
 
+## Hooks
+
+A `PostToolUse` hook runs `nextflow lint` on any `.nf` or `.config` file the plugin writes or edits, feeding errors back so they get fixed automatically. It requires `nextflow` on `PATH` and skips silently when Nextflow isn't installed.
+
 ## Local Development
 
 To test the plugin locally without installing:
