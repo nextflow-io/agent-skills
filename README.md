@@ -50,7 +50,7 @@ gh skill update --all
 To test the plugin locally without installing:
 
 ```bash
-claude --plugin-dir /path/to/claude-plugin
+claude --plugin-dir /path/to/agent-skills
 ```
 
 ## Requirements
