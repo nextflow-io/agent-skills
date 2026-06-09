@@ -8,7 +8,7 @@ allowed-tools: Bash, Read, Glob, mcp__seqera__search_seqera_api, mcp__seqera__ca
 
 Launch Nextflow pipeline executions on cloud (AWS, Google Cloud, Azure) and HPC clusters (Slurm, LSF, etc.) through Seqera Platform. Seqera Platform manages the target compute environment, executes the pipeline from a remote Git repository, and provides monitoring.
 
-**Requires Nextflow 26.04.0 or later** (for the `nextflow auth` and `nextflow launch` commands).
+**Requires Nextflow 26.04 or later** (for the `nextflow auth` and `nextflow launch` commands).
 
 ## Main Flow
 
@@ -22,7 +22,7 @@ Launch Nextflow pipeline executions on cloud (AWS, Google Cloud, Azure) and HPC 
 Check whether the user is already authenticated:
 
 ```bash
-nextflow auth list
+nextflow auth status
 ```
 
 If not authenticated, sign in:
@@ -138,7 +138,7 @@ nextflow launch https://github.com/nf-core/rnaseq \
 
 ## Critical Rules
 
-1. **AUTHENTICATE first** — check `nextflow auth list` before attempting to launch.
+1. **AUTHENTICATE first** — check `nextflow auth status` before attempting to launch.
 2. **CONFIRM the compute environment** — always show the user the selected CE before launching.
 3. **REQUIRE a remote Git repository** — the pipeline must be hosted on GitHub or a compatible Git host. If not, help the user set it up before launching.
 4. **PUSH local changes first** — the launched run uses the remote code, so local edits must be committed and pushed.
