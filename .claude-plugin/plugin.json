@@ -1,7 +1,7 @@
 {
   "name": "nextflow",
   "description": "Skills for building and running Nextflow pipelines with modules from the Nextflow Registry (nf-core and more)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Nextflow",
     "url": "https://nextflow.io"
