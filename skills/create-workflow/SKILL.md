@@ -3,17 +3,19 @@ name: create-workflow
 description: |
   INVOKE THIS SKILL IMMEDIATELY when user asks to: write/create/build a Nextflow pipeline or workflow,
   create any bioinformatics pipeline (RNA-seq, DNA-seq, variant calling, ChIP-seq, etc.),
-  or compose/chain nf-core modules. This skill handles all Nextflow workflow creation tasks.
+  or compose/chain Nextflow modules from the Nextflow Registry. This skill handles all Nextflow workflow creation tasks.
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill
 ---
 
 # Nextflow Workflow Writer
 
-Create complete Nextflow workflows by composing validated nf-core modules.
+Create complete Nextflow workflows by composing validated modules from the [Nextflow Registry](https://registry.nextflow.io).
+
+Modules are published under namespaces (e.g. `nf-core/fastqc`), and these skills compose modules from any of them.
 
 **Requires Nextflow 26.04 or later** (for the `nextflow module` commands used during validation).
 
-**NEVER write a wrapper workflow just to run/test a single nf-core module.**
+**NEVER write a wrapper workflow just to run/test a single module.**
 
 ❌ **WRONG** - Writing a workflow to run one module:
 ```groovy
@@ -28,13 +30,13 @@ Skill(skill="run-module")
 ```
 
 **The `run-module` skill:**
-- Uses `nextflow module search/info` to discover and get proper inputs/parameters
-- Runs modules directly via `nextflow module run nf-core/<module>`
+- Uses `nextflow module search/view` to discover and get proper inputs/parameters
+- Runs modules directly via `nextflow module run <namespace>/<module>`
 - No wrapper workflow needed
 
 **⚠️ When a module run fails due to missing args:**
 - DO NOT write a wrapper workflow as a "fix"
-- Instead: run `nextflow module info <module>` to get correct parameters
+- Instead: run `nextflow module view <module>` to get correct parameters
 - Fix the command-line arguments and re-run directly
 
 **Only write a workflow in Step 4** when composing multiple validated modules together.
@@ -45,8 +47,8 @@ Skill(skill="run-module")
 
 ### Step 1: Identify Modules and Propose Plan
 
-1. Use `nextflow module search <term>` to find nf-core modules for each processing step
-2. Use `nextflow module info <name>` to understand inputs/outputs of each module
+1. Use `nextflow module search <term>` to find Registry modules for each processing step
+2. Use `nextflow module view <name>` to understand inputs/outputs of each module
 3. **Present a plan to the user** with:
    - List of identified modules
    - Processing sequence (which module runs first, second, etc.)
@@ -87,7 +89,7 @@ Only after ALL modules run successfully:
    docker.enabled = true
    ```
 
-2. Write the workflow script compositing all validated steps using **Nextflow managed modules** (no `./` prefix — Nextflow automatically downloads and installs them from the registry):
+2. Write the workflow script compositing all validated steps using **Nextflow managed modules** (no `./` prefix — Nextflow automatically downloads and installs them from the Nextflow Registry):
    ```groovy
    include { MODULE_A } from 'nf-core/module_a'
    include { MODULE_B } from 'nf-core/module_b'
@@ -112,13 +114,13 @@ Only after ALL modules run successfully:
 - Reference task IDs from stdout to locate output files in work directories
 
 ### Module Include Syntax
-- `include { MOD } from 'nf-core/module'` — **Nextflow managed module** (default). Nextflow automatically downloads and installs it from the registry. Always prefer this form.
+- `include { MOD } from 'nf-core/module'` — **Nextflow managed module** (default). Nextflow automatically downloads and installs it from the Nextflow Registry. Always prefer this form. (`nf-core` here is the namespace; substitute the actual namespace of the module you are using.)
 - `include { MOD } from './modules/nf-core/module/main.nf'` — **Local file path**, resolved against the working directory. Only use when referencing locally modified modules.
 
 ### Module Selection
-- Prefer nf-core single-tool modules over sub-workflows
+- Prefer single-tool modules over sub-workflows
 - Do not write wrapper workflows to test single modules - use `Skill(skill="run-module")` instead
-- Use `nextflow module search` to find modules, then `nextflow module info` for details
+- Use `nextflow module search` to find modules, then `nextflow module view` for details
 
 ### Debugging Protocol
 1. Check the task work directory using the task ID from stdout

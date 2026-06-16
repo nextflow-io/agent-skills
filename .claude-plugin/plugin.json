@@ -1,6 +1,6 @@
 {
   "name": "nextflow",
-  "description": "Nextflow and nf-core bioinformatics workflow skills powered by Seqera MCP",
+  "description": "Skills for building and running Nextflow pipelines with modules from the Nextflow Registry (nf-core and more)",
   "version": "1.0.0",
   "author": {
     "name": "Nextflow",
@@ -8,5 +8,5 @@
   },
   "repository": "https://github.com/nextflow-io/agent-skills",
   "license": "Apache-2.0",
-  "keywords": ["nextflow", "nf-core", "bioinformatics", "seqera", "workflows"]
+  "keywords": ["nextflow", "nextflow-registry", "nf-core", "bioinformatics", "seqera", "workflows"]
 }

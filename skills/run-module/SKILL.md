@@ -1,12 +1,14 @@
 ---
 name: run-module
-description: Run Nextflow modules natively using `nextflow module` commands. Use when running, listing, or getting info about Nextflow modules.
+description: Run Nextflow Registry modules natively using `nextflow module` commands. Use when running, listing, or getting info about Nextflow modules.
 allowed-tools: Bash, Read, Glob
 ---
 
 # Run Nextflow Modules
 
-Run modules natively using `nextflow module` commands. Everything is self-contained — no external tools or MCP needed. Modules are installed on-the-fly when run.
+Run modules from the [Nextflow Registry](https://registry.nextflow.io) natively using `nextflow module` commands. Everything is self-contained — no external tools or MCP needed. Modules are installed on-the-fly when run.
+
+Modules are published under namespaces (e.g. `nf-core/fastqc`), and the `nextflow module` commands work with any of them.
 
 **Requires Nextflow 26.04 or later** (for the `nextflow module` commands).
 

@@ -1,15 +1,17 @@
 # Nextflow Agent Skills
 
-Agent skills for Nextflow and nf-core bioinformatics workflows.
+Agent skills for building and running Nextflow pipelines with modules from the [Nextflow Registry](https://registry.nextflow.io).
+
+The Nextflow Registry is the central place to discover and share Nextflow modules and plugins. Modules are published under namespaces — [nf-core](https://nf-co.re) is the most prominent — and these skills work with modules from any of them.
 
 These skills follow the [Agent Skills](https://agentskills.io/specification) specification, so they can be used by any skills-compatible agent, including Claude Code, Codex CLI, OpenCode, and Cursor.
 
 ## Skills
 
 - [`install-nextflow`](./skills/install-nextflow) — Install or upgrade Nextflow (and Java 17+ via SDKMAN if needed)
-- [`create-workflow`](./skills/create-workflow) — Create Nextflow pipelines by composing nf-core modules
-- [`run-module`](./skills/run-module) — Run Nextflow modules natively using the `nextflow module` command
-- [`launch-workflow`](./skills/launch-workflow) — Launch workflow executions on Seqera Platform
+- [`create-workflow`](./skills/create-workflow) — Create Nextflow pipelines by composing modules from the Nextflow Registry
+- [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
+- [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
 
 ## Installation
 
