@@ -1,17 +1,16 @@
 {
-  "name": "nextflow-io-claude-plugin",
+  "name": "nextflow-io-agent-skills",
   "owner": {
     "name": "Nextflow",
     "url": "https://nextflow.io"
   },
   "metadata": {
-    "description": "Claude Code skills and hooks for Nextflow and nf-core bioinformatics workflows, powered by the Seqera MCP server."
+    "description": "Skills for building and running Nextflow pipelines with modules from the Nextflow Registry (nf-core and more), powered by the Seqera MCP server."
   },
   "plugins": [
     {
       "name": "nextflow",
-      "source": "./",
-      "description": "Nextflow and nf-core bioinformatics workflow skills powered by Seqera MCP"
+      "source": "./"
     }
   ]
 }
