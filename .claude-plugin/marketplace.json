@@ -1,0 +1,16 @@
+{
+  "name": "nextflow-io-agent-skills",
+  "owner": {
+    "name": "Nextflow",
+    "url": "https://nextflow.io"
+  },
+  "metadata": {
+    "description": "Skills for building and running Nextflow pipelines with modules from the Nextflow Registry (nf-core and more), powered by the Seqera MCP server."
+  },
+  "plugins": [
+    {
+      "name": "nextflow",
+      "source": "./"
+    }
+  ]
+}
