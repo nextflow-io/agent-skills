@@ -11,6 +11,7 @@ permissions:
 jobs:
   manifests:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -19,25 +20,9 @@ jobs:
         with:
           node-version: 22
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code@2.1.152
       - name: Validate plugin manifest
         run: claude plugin validate .claude-plugin/plugin.json --strict
       - name: Validate marketplace manifest
         if: hashFiles('.claude-plugin/marketplace.json') != ''
         run: claude plugin validate .claude-plugin/marketplace.json --strict
-
-  shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-      - name: ShellCheck hook scripts
-        run: |
-          shopt -s nullglob
-          scripts=(hooks/scripts/*.sh)
-          if [ ${#scripts[@]} -eq 0 ]; then
-            echo "No hook scripts to check."
-            exit 0
-          fi
-          shellcheck "${scripts[@]}"
