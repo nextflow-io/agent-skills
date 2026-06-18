@@ -6,17 +6,42 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/record-edit.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
+            "if": "Edit(*.nf)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
+            "asyncRewake": true,
+            "timeout": 120
+          },
           {
             "type": "command",
+            "if": "Write(*.nf)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
+            "asyncRewake": true,
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "if": "MultiEdit(*.nf)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
+            "asyncRewake": true,
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "if": "Edit(*.config)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
+            "asyncRewake": true,
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "if": "Write(*.config)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
+            "asyncRewake": true,
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "if": "MultiEdit(*.config)",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nextflow-lint.sh",
             "asyncRewake": true,
             "timeout": 120
