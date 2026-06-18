@@ -35,11 +35,11 @@ Typed processes and workflows require **both**:
 **`nextflow lint` does *not* type-check** — it only checks syntax. Static type checking lives in the Nextflow language server (the engine behind the VS Code extension). This skill bundles a wrapper that drives that language server headlessly and prints its diagnostics:
 
 ```bash
-python3 <skill-dir>/scripts/nf-typecheck.py <project-dir>
+<skill-dir>/scripts/nf-typecheck.sh <project-dir>
 ```
 
-- On first run it downloads the 26.04 language server jar to `~/.nextflow/lsp/v26.04/` (needs Java 17+ and network access); later runs reuse it.
-- It prints one line per diagnostic, grouped by file: `path:line:col: severity: message`, followed by a summary. Add `--json` for machine-readable output, or `--paranoid` to surface every warning.
+- On first run it downloads the 26.04 language server jar to `~/.nextflow/lsp/v26.04/` (needs `java` 17+, `jq`, `curl`, and network access); later runs reuse it.
+- It prints one line per diagnostic, grouped by file: `path:line:col: severity: message`, followed by a summary.
 - **Type mismatches are reported at `warning` severity** (e.g. `The + operator is not defined for operands with types String and Integer`), alongside genuine `error`s. Don't rely on the exit code alone — read the `warning` lines, since the type errors you are chasing live there.
 
 Work **outward from the leaves**: type the process modules first, then the subworkflows that call them, then the entry workflow and params. A typed process forces its callers to provide correctly-shaped records, so the errors guide you up the call tree.
@@ -56,7 +56,7 @@ For each file, top to bottom:
 
 ### Step 3: Verify
 
-Re-run `python3 <skill-dir>/scripts/nf-typecheck.py <project-dir>` after each file and repeat until it reports **`No diagnostics. ✓`** for the files you are migrating.
+Re-run `<skill-dir>/scripts/nf-typecheck.sh <project-dir>` after each file and repeat until it reports **`No diagnostics. ✓`** for the files you are migrating.
 
 Then confirm behavior is unchanged with the project's tests:
 
@@ -207,4 +207,4 @@ Typed channels carry records, and several legacy operators should be avoided. Th
 3. **PREFER RECORDS OVER TUPLES** — Convert `tuple val(meta), path(...)` to records with named, typed fields. Define shared record types once and `include` them. Access fields by name, never by index.
 4. **PRESERVE BEHAVIOR** — Same files staged, same values emitted, same conditions.
 5. **SWAP LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, operator-form `splitCsv`, and capitalized `Channel.` factories per the operators table.
-6. **VERIFY** — Re-run `scripts/nf-typecheck.py` until it reports `No diagnostics. ✓` (type mismatches surface as `warning`s — read them, don't trust the exit code alone), then run the project's tests to confirm the output tree and emitted values are unchanged.
+6. **VERIFY** — Re-run `scripts/nf-typecheck.sh` until it reports `No diagnostics. ✓` (type mismatches surface as `warning`s — read them, don't trust the exit code alone), then run the project's tests to confirm the output tree and emitted values are unchanged.
