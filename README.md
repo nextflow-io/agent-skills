@@ -12,6 +12,7 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 - [`create-workflow`](./skills/create-workflow) — Create Nextflow pipelines by composing modules from the Nextflow Registry
 - [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
+- [`migrate-nextflow-code`](./skills/migrate-nextflow-code) — Migrate pipeline code to newer language requirements (currently: fixing strict syntax errors, and migrating `publishDir` to workflow outputs)
 
 ## Installation
 
