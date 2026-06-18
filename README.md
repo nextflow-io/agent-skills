@@ -13,6 +13,10 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 - [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
 
+## Hooks (Claude Code only)
+
+When the plugin is installed in Claude Code, a `PostToolUse` hook runs `nextflow lint` on each `.nf` or `.config` file as Claude edits it. The hook is scoped with `if` patterns so it only fires on Nextflow files, and it is async (`asyncRewake`): it runs in the background without blocking the edit, and if lint finds problems the output is surfaced to Claude as a system reminder to fix. The hook requires `nextflow` and `jq` on `PATH` and skips silently otherwise.
+
 ## Installation
 
 ### Claude Code
