@@ -11,15 +11,19 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 ## Layout
 
 - `skills/<name>/SKILL.md` — one skill per directory; the directory name must match the `name:` in frontmatter.
+- Skills may bundle resources: `references/*.md` (loaded on demand) and `scripts/*` (executable helpers, e.g. `migrate-nextflow-code/scripts/nf-typecheck.py`).
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
 - `.mcp.json` — declares the `seqera` MCP server (`https://mcp.seqera.io/mcp`) that `launch-workflow` depends on.
 
-## The four skills and how they relate
+## The skills and how they relate
 
 - `install-nextflow` — installs/upgrades Nextflow and the Java 17+ prerequisite (via SDKMAN). Other skills require **Nextflow 26.04+**.
 - `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP).
 - `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
 - `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
+- `migrate-nextflow-code` — migrates pipeline code to newer language requirements via a detect → fix → verify loop. Its `SKILL.md` is an **index**: a table maps each migration type to a self-contained file under `skills/migrate-nextflow-code/reference/` (e.g. `strict-syntax.md`) that the agent loads on demand. Add a new migration by adding a `references/<name>.md` file and a row to the index table. Current migrations: strict syntax (Nextflow 26.04+, driven by `nextflow lint`), static typing (typed processes/workflows, records replacing tuples, typed params), and workflow outputs (`publishDir` → the `output {}` block). The table is also a dependency order — static typing requires a clean strict-syntax baseline first.
+
+Detection note: `nextflow lint` only checks **syntax**, not types. Type checking lives in the Nextflow language server, so the static-typing migration drives it headlessly via the bundled `scripts/nf-typecheck.py` (downloads the 26.04 language-server jar to `~/.nextflow/lsp/v26.04/`, runs an LSP session, prints diagnostics grouped by file). Type mismatches come back at `warning` severity.
 
 When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
 
