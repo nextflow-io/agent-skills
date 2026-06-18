@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Stop hook: lint the .nf/.config files edited during this turn, once, on
-# their final state. Single JVM startup; no work-in-progress false positives.
-# Exit 2 with lint output on stderr blocks Stop so Claude self-corrects.
+# Stop hook (asyncRewake): lint the .nf/.config files edited during this turn,
+# once, on their final state. Single JVM startup; no work-in-progress false
+# positives. Runs in the background so it never delays the user getting control
+# back; on exit 2 its stderr is surfaced to Claude as a system reminder to fix.
 set -euo pipefail
 
 # Skip silently if prerequisites are missing rather than spam every Stop event.
@@ -38,9 +39,9 @@ if output="$(nextflow lint "${files[@]}" 2>&1)"; then
 fi
 
 {
-  echo "nextflow lint found issues in files edited this turn:"
+  echo "nextflow lint found issues in files edited in the last turn:"
   echo "$output"
   echo
-  echo "Fix the lint errors above before stopping."
+  echo "Fix the lint errors above."
 } >&2
 exit 2
