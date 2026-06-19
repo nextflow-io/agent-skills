@@ -13,6 +13,18 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 - [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
 
+## Language server
+
+The plugin also wires up the official [Nextflow language server](https://github.com/nextflow-io/language-server) as a [Claude Code LSP server](https://code.claude.com/docs/en/plugins-reference#lsp-servers). When you edit a `.nf` script or `nextflow.config`, the agent gets real-time diagnostics, go-to-definition, and hover info — so mistakes surface as you write rather than only when the pipeline runs.
+
+The launcher (`scripts/nextflow-language-server.sh`) resolves the server in this order:
+
+1. a native `nlsp` binary on your `PATH` (no JVM startup cost), then
+2. a jar pointed to by `$NEXTFLOW_LSP_JAR` (e.g. a local development build), then
+3. the official `language-server-all.jar` — following the same convention as the [Nextflow VS Code extension](https://github.com/nextflow-io/vscode-language-nextflow): it resolves the latest patch release of the tracked minor version from GitHub and caches it at `~/.nextflow/lsp/v26.04/v26.04.<patch>.jar`, reusing the cached jar on later starts.
+
+The jar path needs Java 17+ (the same prerequisite as the `install-nextflow` skill). Set `NEXTFLOW_LSP_VERSION` to track a different minor version (default `26.04`), and `GITHUB_TOKEN` to avoid GitHub API rate limits.
+
 ## Installation
 
 ### Claude Code
