@@ -13,6 +13,7 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 - `skills/<name>/SKILL.md` — one skill per directory; the directory name must match the `name:` in frontmatter.
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
 - `.mcp.json` — declares the `seqera` MCP server (`https://mcp.seqera.io/mcp`) that `launch-workflow` depends on.
+- `.lsp.json` — declares the [Nextflow language server](https://github.com/nextflow-io/language-server) as an LSP server, giving the agent live diagnostics/navigation for `.nf` and `.config` files. It runs `scripts/nextflow-language-server.sh`, which prefers a native `nlsp` binary on PATH and otherwise downloads/runs the `language-server-all.jar` (needs Java 17+). When bumping the pinned language-server version, update `VERSION` in that script.
 
 ## The four skills and how they relate
 

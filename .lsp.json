@@ -1,0 +1,13 @@
+{
+  "nextflow": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-language-server.sh",
+    "extensionToLanguage": {
+      ".nf": "nextflow",
+      ".config": "nextflow-config"
+    },
+    "env": {
+      "CLAUDE_PLUGIN_DATA": "${CLAUDE_PLUGIN_DATA}"
+    },
+    "startupTimeout": 120000
+  }
+}
