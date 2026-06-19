@@ -20,10 +20,10 @@ The plugin also wires up the official [Nextflow language server](https://github.
 The launcher (`scripts/nextflow-language-server.sh`) resolves the server in this order:
 
 1. a native `nlsp` binary on your `PATH` (no JVM startup cost), then
-2. a jar pointed to by `$NEXTFLOW_LSP_JAR`, then
-3. the official `language-server-all.jar`, downloaded once into the plugin's persistent data directory.
+2. a jar pointed to by `$NEXTFLOW_LSP_JAR` (e.g. a local development build), then
+3. the official `language-server-all.jar` — following the same convention as the [Nextflow VS Code extension](https://github.com/nextflow-io/vscode-language-nextflow): it resolves the latest patch release of the tracked minor version from GitHub and caches it at `~/.nextflow/lsp/v26.04/v26.04.<patch>.jar`, reusing the cached jar on later starts.
 
-The jar path needs Java 17+ (the same prerequisite as the `install-nextflow` skill). Set `NEXTFLOW_LSP_VERSION` to pin a different language-server release.
+The jar path needs Java 17+ (the same prerequisite as the `install-nextflow` skill). Set `NEXTFLOW_LSP_VERSION` to track a different minor version (default `26.04`), and `GITHUB_TOKEN` to avoid GitHub API rate limits.
 
 ## Installation
 
