@@ -171,7 +171,6 @@ Note how the record's named fields (`sample.id`, `sample.fastqc`) make the dynam
 
 1. **CHECK RECORDS FIRST** — If the pipeline is large and still uses tuples (`tuple val(meta), path(...)`) rather than records, STOP and recommend migrating tuples → records first. Workflow outputs are much easier with named record fields.
 2. **INVENTORY BEFORE EDITING** — `grep` every `publishDir` (scripts and config) and record what/where/condition for each before changing anything. Never guess.
-3. **PRESERVE THE OUTPUT TREE** — Same files, same destination paths, same conditions. This is not a refactor of pipeline logic.
-4. **publish: AND output {} MUST MATCH** — Every name assigned in `publish:` must be declared in `output {}`, and vice versa.
-5. **MATCH THE CLOSURE TO THE CHANNEL** — A dynamic `path { ... }` closure's parameters must match the structure of the published channel's values.
-6. **VERIFY BY DIFFING** — Compare the published directory tree before and after; it must be identical. Run the project's tests to confirm.
+3. **publish: AND output {} MUST MATCH** — Every name assigned in `publish:` must be declared in `output {}`, and vice versa.
+4. **MATCH THE CLOSURE TO THE CHANNEL** — A dynamic `path { ... }` closure's parameters must match the structure of the published channel's values.
+5. **VERIFY BY DIFFING** — Compare the published directory tree before and after; it must be identical. Run the project's tests to confirm.

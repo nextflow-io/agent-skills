@@ -100,9 +100,5 @@ Reach for this only after confirming the construct can't be rewritten with the t
 
 ## Critical rules for this migration
 
-1. **DETECT FIRST** — Always run `nextflow lint -o concise .` to enumerate the actual errors before changing anything. Never guess at what needs fixing.
-2. **PRESERVE BEHAVIOR** — This migration is about parser compatibility, not refactoring. Apply the smallest change that resolves each error; do not alter pipeline logic.
-3. **LOOP UNTIL CLEAN** — Re-run the linter after each batch of fixes and repeat until zero errors remain.
-4. **VERIFY** — Run the project's tests (`nf-test test` or a `-profile test` run) to confirm behavior is unchanged before declaring the migration done.
-5. **USE THE ESCAPE HATCH SPARINGLY** — Move code to `lib/` only when it truly cannot be expressed in strict syntax.
-6. **WATCH FOR SILENT BEHAVIOR CHANGES** — CLI params are no longer auto-cast; verify boolean/numeric params still behave correctly after migration.
+1. **USE THE ESCAPE HATCH SPARINGLY** — Move code to `lib/` only when it truly cannot be expressed in strict syntax.
+2. **WATCH FOR SILENT BEHAVIOR CHANGES** — CLI params are no longer auto-cast; verify boolean/numeric params still behave correctly after migration.
