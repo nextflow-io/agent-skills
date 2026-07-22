@@ -14,6 +14,10 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
 - [`migrate-nextflow-code`](./skills/migrate-nextflow-code) — Migrate pipeline code to newer language requirements (currently: fixing strict syntax errors, and migrating `publishDir` to workflow outputs)
 
+## Language server
+
+The plugin uses the official [Nextflow language server](https://github.com/nextflow-io/language-server) as a [Claude Code LSP server](https://code.claude.com/docs/en/plugins-reference#lsp-servers). When you edit a `.nf` script or `nextflow.config`, the agent gets real-time diagnostics (errors and warnings), go-to-definition, and hover info, so mistakes surface as you write. The `migrate-nextflow-code` skill relies on these diagnostics to drive code migrations.
+
 ## Installation
 
 ### Claude Code

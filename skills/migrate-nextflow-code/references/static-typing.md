@@ -32,17 +32,13 @@ Typed processes and workflows require **both**:
 
 ### Step 1: Detect
 
-**`nextflow lint` does *not* type-check** — it only checks syntax. Static type checking lives in the Nextflow language server (the engine behind the VS Code extension). This skill bundles a wrapper that drives that language server headlessly and prints its diagnostics:
+Static type checking is provided by the Nextflow language server, which is included in this plugin. After you edit a `.nf` or `nextflow.config` file, Claude Code pushes the server's diagnostics into your context automatically.
 
-```bash
-<skill-dir>/scripts/nf-typecheck.sh <project-dir>
-```
+- The language server jar is downloaded on first use; no action needed from you.
+- **Type checking only runs on files that opt in** with `nextflow.enable.types = true`.
+- Some type mismatches are reported as errors while others are reported as warnings -- make sure to check both.
 
-- On first run it downloads the 26.04 language server jar to `~/.nextflow/lsp/v26.04/` (needs `java` 17+, `jq`, `curl`, and network access); later runs reuse it.
-- It prints one line per diagnostic, grouped by file: `path:line:col: severity: message`, followed by a summary.
-- **Type mismatches are reported at `warning` severity** (e.g. `The + operator is not defined for operands with types String and Integer`), alongside genuine `error`s. Don't rely on the exit code alone — read the `warning` lines, since the type errors you are chasing live there.
-
-Work **outward from the leaves**: type the process modules first, then the subworkflows that call them, then the entry workflow and params. A typed process forces its callers to provide correctly-shaped records, so the errors guide you up the call tree.
+Because diagnostics refresh after each edit, detection and verification are the same loop: enable the flag on a file, read the diagnostics, fix, and repeat. Work **outward from the leaves**: type the processes first, then the subworkflows that call them, then the entry workflow and params. A typed process forces its callers to provide correctly-shaped records, so the errors guide you up the call tree.
 
 ### Step 2: Fix
 
@@ -56,7 +52,7 @@ For each file, top to bottom:
 
 ### Step 3: Verify
 
-Re-run `<skill-dir>/scripts/nf-typecheck.sh <project-dir>` after each file and repeat until it reports **`No diagnostics. ✓`** for the files you are migrating.
+After editing each file, read the diagnostics the language server pushes for it and repeat the fix loop until **no errors or type-mismatch warnings remain** for the files you are migrating. A file is done when it opts into types (`nextflow.enable.types = true`) and reports clean.
 
 Then confirm behavior is unchanged with the project's tests:
 
@@ -207,4 +203,4 @@ Typed channels carry records, and several legacy operators should be avoided. Th
 3. **PREFER RECORDS OVER TUPLES** — Convert `tuple val(meta), path(...)` to records with named, typed fields. Define shared record types once and `include` them. Access fields by name, never by index.
 4. **PRESERVE BEHAVIOR** — Same files staged, same values emitted, same conditions.
 5. **SWAP LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, operator-form `splitCsv`, and capitalized `Channel.` factories per the operators table.
-6. **VERIFY** — Re-run `scripts/nf-typecheck.sh` until it reports `No diagnostics. ✓` (type mismatches surface as `warning`s — read them, don't trust the exit code alone), then run the project's tests to confirm the output tree and emitted values are unchanged.
+6. **VERIFY** — After each edit, read the language server's diagnostics (pushed into context by the LSP integration) and fix until no errors or type-mismatch warnings remain. Then run the project's tests to confirm the output tree and emitted values are unchanged.
