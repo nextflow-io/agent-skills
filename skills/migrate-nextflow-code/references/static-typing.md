@@ -29,6 +29,7 @@ Type checking is provided by the Nextflow language server, which is included in 
 
 - After you edit a `.nf` or `nextflow.config` file, you will receive diagnostics automatically.
 - Some type mismatches are reported as errors while others are reported as warnings -- make sure to check both.
+- **Hover a variable or call site to see its inferred type.** The language server serves type hints over LSP hover — use them to inspect a value whose type isn't obvious from the code, e.g. which fields a bare `Record` actually carries. This tells you what the type checker sees, which is faster than guessing when a type mismatch occurs.
 - **Pushed diagnostics identify a file by its name only.** In a pipeline with many identically-named module files (`modules/*/main.nf`), you may not be able to tell which `main.nf` a diagnostic belongs to. In this case, you can run the bundled fallback for repo-relative paths:
 
   ```bash

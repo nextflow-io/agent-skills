@@ -4,7 +4,15 @@ Part of the [static typing migration](static-typing.md). This page covers typing
 
 ## Process inputs
 
-The `input:` section becomes a list of `name: Type` declarations — no `tuple`/`val`/`path` qualifiers.
+The `input:` section becomes a list of declarations. There are three forms:
+
+```nextflow
+input:
+meta: Record                      // scalar (name: Type)
+reads: Path
+record(meta: Record, reads: Path) // destructured record (binds each field directly)
+tuple(meta: Record, reads: Path)  // destructured tuple
+```
 
 | Untyped | ✅ Typed |
 |---------|---------|
@@ -12,9 +20,23 @@ The `input:` section becomes a list of `name: Type` declarations — no `tuple`/
 | `path reads` | `reads: Path` |
 | `path "*.fq"` (collection) | `reads: List<Path>` (ordered) / `Bag<Path>` (unordered) / `Set<Path>` |
 | Optional input | `name: Type?` (nullable via `?`) |
-| `tuple val(meta), path(reads)` | `record(meta: Record, reads: List<Path>)` |
+| `tuple val(meta), path(reads)` | `tuple(meta: Record, reads: List<Path>)` (literal typed tuple) |
 
 The `path` qualifier becomes the `Path` **type**; `val` qualifiers are replaced by a concrete type (`String`, `Integer`, `Float`, `Boolean`, `Map`, `List<T>`, …). `Channel` and `Value` are **not** valid input types — those are workflow-level only.
+
+### Migrate tuple inputs to records
+
+`tuple(...)` and `record(...)` are **distinct types** — a `tuple(meta: Record, reads: List<Path>)` input (typed `Tuple<...>`) will **not** accept a `record(...)` value (typed `Record`), and vice versa. So migrate the input from a tuple to a record:
+
+```nextflow
+// legacy tuple input, typed literally
+tuple(meta: Record, reads: List<Path>)
+
+// ✅ migrated to a record input — connects to record channels
+record(meta: Record, reads: List<Path>)
+```
+
+Both bind `meta` and `reads` the same way in the script body; only the type changes. Prefer the record form everywhere the channel carries records.
 
 ## Process input staging
 
@@ -49,6 +71,12 @@ file("versions.yml") >> 'versions'
 ```
 
 Collect them in the entry workflow with `channel.topic('versions')` instead of threading a `ch_versions` channel through every call. This also lets you delete the `ch_versions = ch_versions.mix(...)` plumbing.
+
+`channel.topic('versions')` has an **unknown element type** — the type checker cannot infer it from the emissions, even though you know what each process emitted. Cast each element when mapping over it:
+
+```nextflow
+channel.topic('versions').map { v -> v as Path }
+```
 
 ## The `when:` block
 

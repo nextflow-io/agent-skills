@@ -44,6 +44,7 @@ These are direct substitutions:
 | `.set { x }` / `.tap { x }` | plain assignment: `x = ch` |
 | `.join(other)` | `.join(other, by: 'id')` — `by` is required |
 | `.mix(a, b, c)` | chain: `.mix(a).mix(b).mix(c)` |
+| `.distinct()` | `.unique()` |
 | implicit closure param `it` | name it: `{ r -> ... }` |
 | `.collectFile(...)` | deferred — see [acceptable residual warnings](static-typing.md#acceptable-residual-warnings) |
 
@@ -64,6 +65,8 @@ out.bai
 // ✅ single output: the call IS the channel — no .out, no field access
 bam = FOO(ch)   // bam is the output channel directly
 ```
+
+**Calling an untyped workflow:** the type checker can't infer an untyped workflow's emit shape, so named-emit access (`init.ids`) compiles clean but fails at runtime if the callee is single-emit (it returns the channel directly — use `init` alone).
 
 ### Pipe / fork (`|`, `&`)
 
@@ -126,6 +129,15 @@ ch.splitCsv(header: true)
 
 // ✅ flatMap + the per-file splitCsv method
 ch.flatMap { f -> f.splitCsv(header: true) }
+```
+
+`splitCsv` returns `List<?>` — the row type is ambiguous, so the type checker rejects field/element access until you cast each row:
+
+- **with `header: true`** → cast each row to `Map<String,String>` (access by column name)
+- **without a header** → cast each row to `List<String>` (access by position)
+
+```nextflow
+ch.flatMap { f -> f.splitCsv(header: true) as List<Map<String,String>> }
 ```
 
 ### `each` input qualifier → `.combine` in the caller
