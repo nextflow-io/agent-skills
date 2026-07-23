@@ -12,10 +12,8 @@ Reference:
 
 Workflow outputs work best with **records** — channel values that are maps with named fields (`sample.fastq_1`, `sample.id`). While workflow outputs can be used with tuples (e.g. `tuple val(meta), path(reads)`), they are far cleaner when the published channel carries records.
 
-**If the pipeline is large and still uses tuples (the `tuple val(meta), path(...)` idiom), STOP.** Tell the user to migrate from tuples to records first, then return to this migration. Workflow outputs are much easier to express once values have named fields, and migrating to it without records on a big pipeline produces a sprawling diff with many workflow emits.
-
 - **Small pipeline (a handful of published outputs):** proceed with the migration — add a `.map { meta, file -> meta + [field: file] }` to transform the final channel when it is published.
-- **Large pipeline still on tuples:** stop and recommend the tuples → records migration first.
+- **Large pipeline still on tuples:** **STOP** and recommend the tuples → records migration first — without named fields, a big pipeline produces a sprawling diff with many workflow emits.
 
 If the channels already carry records, proceed.
 
