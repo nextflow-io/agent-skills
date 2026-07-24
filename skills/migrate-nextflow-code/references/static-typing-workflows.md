@@ -22,6 +22,8 @@ Outputs (`emit:`)
 | per-sample channel output | `results: Channel<MethylseqResult> = ch_results` |
 | optional singleton output | `multiqc_report: Value<Path>? = val_report` |
 
+Use **named record types** on workflow takes/emits instead of plain `Record`.
+
 Inside the body, build a result channel by `join`-ing the per-step record channels on a shared field (e.g. `by: 'id'`) so each sample's outputs collapse into one fat record that matches the emitted record type.
 
 ## Operators under typing
@@ -32,7 +34,7 @@ Migrating dataflow logic to static typing consists of:
 2. replacing tuples with records in channels
 3. replacing legacy operators with equivalent typed operators
 
-The full guidelines are in the [operators tutorial](https://docs.seqera.io/nextflow/tutorials/static-types-operators).
+The typed operators are `collect, combine, filter, flatMap, groupBy, join, map, mix, reduce, subscribe, unique, until, view`; all other operators are discouraged under static typing. The full guidelines are in the [operators tutorial](https://docs.seqera.io/nextflow/tutorials/static-types-operators).
 
 ### Trivial renames
 
@@ -137,7 +139,8 @@ ch.flatMap { f -> f.splitCsv(header: true) }
 - **without a header** → cast each row to `List<String>` (access by position)
 
 ```nextflow
-ch.flatMap { f -> f.splitCsv(header: true) as List<Map<String,String>> }
+ch.flatMap { f -> f.splitCsv(header: true) }
+  .map { row -> row as Map<String,String> }
 ```
 
 ### `each` input qualifier → `.combine` in the caller

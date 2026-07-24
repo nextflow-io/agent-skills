@@ -8,14 +8,15 @@ Typed params are an **essential part of this migration**, not an optional extra 
 
    The config `params {}` block and the script `params {}` block are **complementary sources of truth** — config params for the config file, script params for the script — so expect the two blocks to coexist rather than deduplicate them. `nextflow_schema.json` is a JSON-schema representation of the *combined* params; leave it in place (it still drives external tooling).
 
+   If the pipeline uses the `nf-schema` plugin (declared in `nextflow.config`), make sure it is updated to version 2.7.2 or later. Older versions have minor incompatibilities with static typing.
+
 2. **Declare the script-used params in a typed `params {}` block** in the **entry-workflow file** (`main.nf`). No default = **required** (the run fails if omitted); `?` marks optional; a Boolean with no default defaults to `false`.
 
    ```nextflow
    params {
-       input: String                // required
-       outdir: Path = 'results'     // default
+       input: Path                  // required
        fasta: Path?                 // optional
-       aligner: String = 'bismark'
+       aligner: String = 'bismark'  // default
        save_reference: Boolean      // defaults to false
        clip_r1: Integer = 0
    }
@@ -36,7 +37,7 @@ Typed params are an **essential part of this migration**, not an optional extra 
    workflow ALIGNER {
        take:
        // ...
-       params: AlignerParams
+       aligner_params: AlignerParams
 
        // ...
    }

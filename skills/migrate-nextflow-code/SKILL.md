@@ -1,6 +1,6 @@
 ---
 name: migrate-nextflow-code
-description: Migrate Nextflow pipeline code to newer language requirements. Use when fixing strict syntax errors, running `nextflow lint` to detect and fix errors, migrating from the `publishDir` directive to workflow outputs (the `output {}` block), or adding static typing (typed processes/workflows, records, typed params).
+description: Migrate Nextflow pipeline code to newer language requirements. Use when fixing strict syntax errors, migrating from `publishDir` to workflow outputs (the `output {}` block), or adding static typing (typed processes/workflows, records, typed params).
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep
 ---
 

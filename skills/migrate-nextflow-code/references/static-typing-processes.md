@@ -8,32 +8,36 @@ The `input:` section becomes a list of declarations. There are three forms:
 
 ```nextflow
 input:
-meta: Record                      // scalar (name: Type)
+meta: Map                      // scalar (name: Type)
 reads: Path
-record(meta: Record, reads: Path) // destructured record (binds each field directly)
-tuple(meta: Record, reads: Path)  // destructured tuple
+record(meta: Map, reads: Path) // destructured record (binds each field directly)
+tuple(meta: Map, reads: Path)  // destructured tuple
 ```
 
 | Untyped | ✅ Typed |
 |---------|---------|
-| `val meta` | `meta: Record` |
+| `val meta` | `meta: Map` |
 | `path reads` | `reads: Path` |
 | `path "*.fq"` (collection) | `reads: List<Path>` (ordered) / `Bag<Path>` (unordered) / `Set<Path>` |
 | Optional input | `name: Type?` (nullable via `?`) |
-| `tuple val(meta), path(reads)` | `tuple(meta: Record, reads: List<Path>)` (literal typed tuple) |
 
-The `path` qualifier becomes the `Path` **type**; `val` qualifiers are replaced by a concrete type (`String`, `Integer`, `Float`, `Boolean`, `Map`, `List<T>`, …). `Channel` and `Value` are **not** valid input types — those are workflow-level only.
+- The `path` qualifier becomes the `Path` **type**
+- `val` qualifiers are replaced by a concrete type (`String`, `Integer`, `Float`, `Boolean`, `Map`, `List<T>`, …)
+- `Channel` and `Value` are **not** valid input types — those are workflow-level only.
 
 ### Migrate tuple inputs to records
 
-`tuple(...)` and `record(...)` are **distinct types** — a `tuple(meta: Record, reads: List<Path>)` input (typed `Tuple<...>`) will **not** accept a `record(...)` value (typed `Record`), and vice versa. So migrate the input from a tuple to a record:
+`tuple(...)` and `record(...)` are **distinct types** — a `tuple(meta: Map, reads: List<Path>)` input (typed `Tuple<...>`) will **not** accept a `record(...)` value (typed `Record`), and vice versa. So migrate the input from a tuple to a record:
 
 ```nextflow
-// legacy tuple input, typed literally
-tuple(meta: Record, reads: List<Path>)
+// legacy tuple input
+tuple val(meta), path(reads)
+
+// typed tuple input
+tuple(meta: Map, reads: List<Path>)
 
 // ✅ migrated to a record input — connects to record channels
-record(meta: Record, reads: List<Path>)
+record(meta: Map, reads: List<Path>)
 ```
 
 Both bind `meta` and `reads` the same way in the script body; only the type changes. Prefer the record form everywhere the channel carries records.
@@ -55,27 +59,45 @@ A typed process should emit a single **fat record** containing all outputs (the 
 | Untyped | ✅ Typed |
 |---------|---------|
 | `path "out.txt"` | `file('out.txt')` |
-| `path "*.bam"` (collection) | `files('*.bam')` |
+| `path "*.txt"` (collection) | `files('*.txt')` |
 | `path "*.log", optional: true` | `file('*.log', optional: true)` |
 | `stdout` | `stdout()` |
 | `env 'FOO'` | `env('FOO')` |
-| `tuple val(meta), path("*.bam"), emit: bam` | `record(meta: meta, bam: file("*.bam"))` |
+
+Migrate multiple skinny tuples to a single fat record:
+
+```nextflow
+// before
+tuple val(meta), path("*.bam"), emit: bam
+tuple val(meta), path("*.bai"), emit: bai
+
+// after
+record(meta: meta, bam: file("*.bam"), bai: file("*.bai"))
+```
 
 ## Versions and the `topic:` section
 
-The `path "versions.yml", topic: versions` idiom is replaced by a **topic emission**:
+Outputs with a `topic:` qualifier become **topic emissions**. Move them to the `topic:` section and use `>>` to emit to the desired topic:
 
 ```nextflow
 topic:
 file("versions.yml") >> 'versions'
+tuple(task.process, 'tool-name', eval('tool-version')) >> 'versions'
 ```
 
 Collect them in the entry workflow with `channel.topic('versions')` instead of threading a `ch_versions` channel through every call. This also lets you delete the `ch_versions = ch_versions.mix(...)` plumbing.
 
-`channel.topic('versions')` has an **unknown element type** — the type checker cannot infer it from the emissions, even though you know what each process emitted. Cast each element when mapping over it:
+`channel.topic('versions')` has an **unknown element type** — the type checker cannot infer it from the emissions, even though you know what each process emitted. Cast each element to the appropriate type when mapping over it.
 
 ```nextflow
+// file emissions
 channel.topic('versions').map { v -> v as Path }
+
+// (process, tool, version) tuple emissions — cast to Tuple, then the map
+// closure can destructure it directly
+channel.topic('versions')
+    .map { v -> v as Tuple<String,String,String> }
+    .map { process, tool, version -> tuple(process.tokenize(':').last(), "  ${tool}: ${version}" as String) }
 ```
 
 ## The `when:` block
@@ -93,11 +115,12 @@ The following is a working list of common substitutions (from real migrations, n
 | `list.flatten()` | not needed — avoid |
 | `list.sort()` | `list.toSorted()` |
 | `list.unique()` | `list.toUnique()` |
-| `map.clone(); map << [k: v]` | `map + [k: v]` |
+| `map.clone(); map << [k: v]` | `map += [k: v]` |
 | `map.putAll(other)` | `map + other` |
 | `map.remove(k)` | `map.subMap(map.keySet() - [k])` |
 | `string.split(sep)` | `string.tokenize(sep)` |
 | `x.toString()` | `"${x}"` |
+| '"' + x + '"' | `"\"${x}\""`
 
 Additional gotchas worth calling out:
 

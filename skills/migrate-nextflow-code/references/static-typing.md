@@ -70,7 +70,7 @@ Some warnings are **out of scope for a static-typing migration** and may be left
 
 #### collectFile
 
-The typed operators are `collect, combine, filter, flatMap, groupBy, join, map, mix, reduce, subscribe, unique, until, view`. ALl other operators are discouraged from use with static typing, including `collectFile`. However, `collectFile` is handled by the **[workflow-outputs migration](workflow-outputs.md)**, which comes after this one.
+`collectFile` is not a typed operator (see the [operator list](static-typing-workflows.md#operators-under-typing)), so it warns under typing. It is handled by the **[workflow-outputs migration](workflow-outputs.md)**, which comes after this one — leave it for now.
 
 #### Process templates
 
@@ -114,6 +114,6 @@ Records are **duck-typed**: a value satisfies a record type if it has at least t
 
 1. **STRICT SYNTAX FIRST** — Static typing requires the v2 parser. Run `nextflow lint -o concise .` and resolve all strict-syntax errors (see [strict-syntax.md](strict-syntax.md)) before adding any types.
 2. **MIGRATE INCREMENTALLY** — Enable `nextflow.enable.types = true` per file, type the leaf modules first, then work up through subworkflows to the entry workflow. Fix type errors as you go.
-3. **PREFER RECORDS OVER TUPLES** — Convert `tuple val(meta), path(...)` to records with named, typed fields. Use explicit record types as needed at component boundaries. Access fields by name, never by index.
-4. **SWAP LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, `groupTuple`, operator-form `splitCsv`, and capitalized `Channel.` factories per the [operator guidelines](static-typing-workflows.md#operators-under-typing).
+3. **MIGRATE TUPLES TO RECORDS** — Convert `tuple val(meta), path(...)` to records with named, typed fields. Use explicit record types as needed at component boundaries. Access fields by name, never by index.
+4. **MIGRATE LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, `groupTuple`, operator-form `splitCsv`, and capitalized `Channel.` factories per the [operator guidelines](static-typing-workflows.md#operators-under-typing).
 5. **MIGRATE PARAMS** — Move script-used params into a typed `params {}` block alongside the entry workflow and propagate them as explicit inputs; do not use the global `params` object inside subworkflows/processes.
