@@ -11,7 +11,7 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 ## Layout
 
 - `skills/<name>/SKILL.md` — one skill per directory; the directory name must match the `name:` in frontmatter.
-- Skills may bundle resources: `references/*.md` (loaded on demand) and `scripts/*` (executable helpers, e.g. `migrate-nextflow-code/scripts/nf-typecheck.sh`).
+- Skills may bundle resources: `references/*.md` (loaded on demand). Shared executable helpers live in the top-level `scripts/` (e.g. `scripts/nextflow-language-server.sh`), referenced from skills via `${CLAUDE_PLUGIN_ROOT}/scripts/...`.
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
 - `.lsp.json` — declares the [Nextflow language server](https://github.com/nextflow-io/language-server) as a Claude Code LSP server, giving the agent live diagnostics (errors + warnings) and navigation for `.nf`/`.config` files.
 - `.mcp.json` — declares the [Seqera MCP](https://mcp.seqera.io/mcp) server, which allows the agent to interact with Seqera Platform.

@@ -33,7 +33,7 @@ Type checking is provided by the Nextflow language server, which is included in 
 - **Pushed diagnostics identify a file by its name only.** In a pipeline with many identically-named module files (`modules/*/main.nf`), you may not be able to tell which `main.nf` a diagnostic belongs to. In this case, you can run the bundled fallback for repo-relative paths:
 
   ```bash
-  <skill-dir>/scripts/nf-typecheck.sh <project-dir>
+  ${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh <project-dir>
   ```
 
   It drives the same language server headlessly and prints one line per diagnostic, with the path relative to the project root.

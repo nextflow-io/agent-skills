@@ -6,7 +6,7 @@
 # Source: https://github.com/nextflow-io/language-server
 #
 # JAR management mirrors the Nextflow VS Code extension (fetchLanguageServer.ts):
-# resolve the latest patch release of a minor version (e.g. v26.04) from GitHub,
+# resolve the latest patch release of a stable version (e.g. v26.04) from GitHub,
 # cache it under ~/.nextflow/lsp/<prefix>/<version>.jar, and reuse it if present.
 #
 # Resolution order:
@@ -18,9 +18,9 @@
 
 set -euo pipefail
 
-# Minor version to track; the latest patch release is resolved at runtime.
-MINOR="${NEXTFLOW_LSP_VERSION:-26.04}"
-PREFIX="v${MINOR}"
+# Stable version to track; the latest patch release is resolved at runtime.
+VERSION="${NEXTFLOW_LSP_VERSION:-26.04}"
+PREFIX="v${VERSION}"
 # Regex-escaped prefix for matching tag/file names like v26.04.1.
 PREFIX_RE="$(printf '%s' "$PREFIX" | sed 's/\./\\./g')"
 
@@ -61,7 +61,7 @@ if [ -z "$jar" ]; then
     exit 1
   fi
 
-  # Resolve the highest stable patch of this minor version from the GitHub tags.
+  # Resolve the highest patch of this stable version from the GitHub tags.
   resolved=""
   if [ -n "$releases" ]; then
     best_patch="$(printf '%s' "$releases" \
@@ -79,7 +79,7 @@ if [ -z "$jar" ]; then
       | grep -E "^${PREFIX_RE}\.[0-9]+\.jar$" \
       | sed 's/\.jar$//' \
       | sort -t. -k3 -n | tail -n1 || true)"
-    [ -n "$resolved" ] && log "GitHub unreachable; using cached ${resolved}."
+    [ -n "$resolved" ] && log "GitHub unreachable; falling back to cache."
   fi
 
   if [ -z "$resolved" ]; then
@@ -96,6 +96,8 @@ if [ -z "$jar" ]; then
     fetch "$url" "${jar}.tmp"
     mv "${jar}.tmp" "$jar"
     log "downloaded ${resolved}."
+  else
+    log "using cached ${resolved}."
   fi
 fi
 
