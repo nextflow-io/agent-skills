@@ -13,7 +13,7 @@ Reference:
 Workflow outputs work best with **records** — channel values that are maps with named fields (`sample.fastq_1`, `sample.id`). While workflow outputs can be used with tuples (e.g. `tuple val(meta), path(reads)`), they are far cleaner when the published channel carries records.
 
 - **Small pipeline (a handful of published outputs):** proceed with the migration — add a `.map { meta, file -> meta + [field: file] }` to transform the final channel when it is published.
-- **Large pipeline still on tuples:** **STOP** and recommend the tuples → records migration first — without named fields, a big pipeline produces a sprawling diff with many workflow emits.
+- **Large pipeline still on tuples:** **STOP** and recommend the [tuples → records migration](static-typing.md) first — without named fields, a big pipeline produces a sprawling diff with many workflow emits.
 
 If the channels already carry records, proceed.
 
@@ -167,7 +167,7 @@ Note how the record's named fields (`sample.id`, `sample.fastqc`) make the dynam
 
 ## Critical rules for this migration
 
-1. **CHECK RECORDS FIRST** — If the pipeline is large and still uses tuples (`tuple val(meta), path(...)`) rather than records, STOP and recommend migrating tuples → records first. Workflow outputs are much easier with named record fields.
+1. **CHECK RECORDS FIRST** — If the pipeline is large and still uses tuples (`tuple val(meta), path(...)`) rather than records, STOP and recommend the [tuples → records migration](static-typing.md) first. Workflow outputs are much easier with named record fields.
 2. **INVENTORY BEFORE EDITING** — `grep` every `publishDir` (scripts and config) and record what/where/condition for each before changing anything. Never guess.
 3. **publish: AND output {} MUST MATCH** — Every name assigned in `publish:` must be declared in `output {}`, and vice versa.
 4. **MATCH THE CLOSURE TO THE CHANNEL** — A dynamic `path { ... }` closure's parameters must match the structure of the published channel's values.

@@ -44,7 +44,7 @@ For each file:
 
 1. Add `nextflow.enable.types = true`.
 2. Migrate the script definitions following the [reference pages](#reference-pages) below.
-3. Replace tuples with records; define record types as needed (see [Record types](#record-types)).
+3. Replace tuples with records; define record types as needed.
 4. Read the diagnostics, fix, and repeat.
 
 Work **outward from the leaves**: type the processes first, then the subworkflows that call them, then the entry workflow and params. A typed process forces its callers to provide correctly-shaped records, so the errors guide you up the call tree.
@@ -86,29 +86,9 @@ Load the page for what you're typing (working **outward from the leaves**, as ab
 | **workflow** | [static-typing-workflows.md](static-typing-workflows.md) | `take:`/`emit:` types, channel operator swaps |
 | **params** | [static-typing-params.md](static-typing-params.md) | typed `params {}` block, propagation as inputs |
 
-[Record types](#record-types) are shared by all three.
+## Type casting
 
-## Record types
-
-Record types can be defined and included across scripts as follows:
-
-```nextflow
-// utils/types.nf
-record Sample {
-    id: String
-    meta: Record
-    reads: List<Path>
-}
-```
-
-```nextflow
-// main.nf
-include { Sample } from './utils/types.nf'
-```
-
-Use `record(field: value, ...)` to construct a record and `r + record(extra: v)` to add fields. Access fields by name (`sample.id`).
-
-Records are **duck-typed**: a value satisfies a record type if it has at least the declared fields. The type checker will tell you if a call site has a record mismatch.
+You can use the cast (`as`) operator to coerce the type of an expression to satisfy the type checker while migrating code. However, type casting should be avoided in the final code except where there is explicit guidance for it (`splitCsv`, topic channel values). Aside from these limited cases, you should never need to use type casts on a fully migrated pipeline.
 
 ## Critical rules for this migration
 

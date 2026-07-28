@@ -4,7 +4,7 @@ Part of the [static typing migration](static-typing.md). This page covers typing
 
 ## Workflow inputs and outputs
 
-`take:` and `emit:` gain type annotations. Channels use `Channel<T>`; dataflow values use `Value<T>`; regular values just use `T`.
+`take:` and `emit:` gain type annotations. Channels use `Channel<V>`; dataflow values use `Value<V>`; regular values just use `V`.
 
 Inputs (`take:`)
 
@@ -22,9 +22,29 @@ Outputs (`emit:`)
 | per-sample channel output | `results: Channel<MethylseqResult> = ch_results` |
 | optional singleton output | `multiqc_report: Value<Path>? = val_report` |
 
-Use **named record types** on workflow takes/emits instead of plain `Record`.
-
 Inside the body, build a result channel by `join`-ing the per-step record channels on a shared field (e.g. `by: 'id'`) so each sample's outputs collapse into one fat record that matches the emitted record type.
+
+## Record types
+
+Record types can be defined and included across scripts. In practice, record types are only needed to define workflow input/output types:
+
+```nextflow
+workflow ALIGN {
+    take:
+    samples: CHannel<Sample>
+
+    // ...
+}
+
+record Sample {
+    meta: Map
+    reads: List<Path>
+}
+```
+
+Use `record(field: value, ...)` to construct a record and `r + record(extra: v)` to add fields. Access fields by name (`sample.id`).
+
+Records are **duck-typed**: a value satisfies a record type if it has at least the declared fields. The type checker will tell you if a call site has a record mismatch.
 
 ## Operators under typing
 

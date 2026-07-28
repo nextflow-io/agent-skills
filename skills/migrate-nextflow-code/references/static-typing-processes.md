@@ -97,7 +97,7 @@ channel.topic('versions').map { v -> v as Path }
 // closure can destructure it directly
 channel.topic('versions')
     .map { v -> v as Tuple<String,String,String> }
-    .map { process, tool, version -> tuple(process.tokenize(':').last(), "  ${tool}: ${version}" as String) }
+    .map { process, tool, version -> tuple(process.tokenize(':').last(), "  ${tool}: ${version}") }
 ```
 
 ## The `when:` block
