@@ -9,8 +9,8 @@
 #
 # What it does:
 #   1. Resolves and launches the language server via scripts/nextflow-language-server.sh
-#      (native nlsp, $NEXTFLOW_LSP_JAR, or a cached/downloaded jar — the same resolution
-#      logic the LSP integration uses).
+#      ($NEXTFLOW_LSP_JAR or a cached/downloaded jar — the same resolution logic the
+#      LSP integration uses).
 #   2. Initializes the given workspace and pushes config so errors and warnings are reported.
 #   3. Opens one .nf (and one .config) file to trigger a full-workspace scan, collects
 #      every published diagnostic, then shuts the server down.
@@ -21,14 +21,14 @@
 #
 # Usage:  nextflow-typecheck.sh [WORKSPACE_DIR]
 #
-# Requires: jq, plus the launcher's own deps (java 17+ or a native nlsp; curl or wget).
+# Requires: jq, plus the launcher's own deps (java 17+; curl or wget).
 # Network access on first run (to download the jar).
 
 set -euo pipefail
 
 # Delegate server resolution/launch to the shared launcher, and reuse the LSP settings
-# from .lsp.json, so this script and the LSP integration stay in sync (native nlsp /
-# $NEXTFLOW_LSP_JAR / cached-or-downloaded jar; errorReportingMode; exclude list).
+# from .lsp.json, so this script and the LSP integration stay in sync ($NEXTFLOW_LSP_JAR
+# / cached-or-downloaded jar; errorReportingMode; exclude list).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$SCRIPT_DIR/..}"
 LAUNCHER="$PLUGIN_ROOT/scripts/nextflow-language-server.sh"
@@ -63,7 +63,7 @@ IN="$WORKDIR/in"; OUT="$WORKDIR/out"; DIAGS="$WORKDIR/diags.ndjson"; SERVER_LOG=
 mkfifo "$IN" "$OUT"
 : > "$DIAGS"
 
-# The launcher resolves the server (nlsp/jar) and execs it, speaking LSP over stdio.
+# The launcher resolves the jar and execs it, speaking LSP over stdio.
 "$LAUNCHER" < "$IN" > "$OUT" 2>"$SERVER_LOG" &
 JPID=$!
 
@@ -77,7 +77,7 @@ trap cleanup EXIT
 exec 3>"$IN"    # writer (held open so the server doesn't see EOF mid-scan)
 exec 4<"$OUT"   # reader
 
-# If the launcher/server dies during startup (missing java/nlsp, bad jar), our first
+# If the launcher/server dies during startup (missing java, bad jar), our first
 # writes hit a closed pipe → SIGPIPE. Surface its log instead of dying opaquely (141).
 # Cleared before the shutdown sends, where a gone server is expected and harmless.
 startup_failed() {

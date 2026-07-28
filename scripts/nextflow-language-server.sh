@@ -10,9 +10,8 @@
 # cache it under ~/.nextflow/lsp/<prefix>/<version>.jar, and reuse it if present.
 #
 # Resolution order:
-#   1. `nlsp` on PATH        — native (GraalVM) build, no JVM startup cost.
-#   2. $NEXTFLOW_LSP_JAR     — an explicit jar (e.g. a local development build).
-#   3. cached/downloaded jar — latest patch of $NEXTFLOW_LSP_VERSION (default 26.04).
+#   1. $NEXTFLOW_LSP_JAR     — an explicit jar (e.g. a local development build).
+#   2. cached/downloaded jar — latest patch of $NEXTFLOW_LSP_VERSION (default 26.04).
 #
 # The server speaks LSP over stdio, so we `exec` to hand our stdio to it.
 
@@ -26,18 +25,13 @@ PREFIX_RE="$(printf '%s' "$PREFIX" | sed 's/\./\\./g')"
 
 log() { echo "nextflow-language-server: $*" >&2; }
 
-# 1. Prefer the native binary if installed.
-if command -v nlsp >/dev/null 2>&1; then
-  exec nlsp "$@"
-fi
-
-# 2. Explicit jar override (development build, custom location).
+# 1. Explicit jar override (development build, custom location).
 jar="${NEXTFLOW_LSP_JAR:-}"
 
 if [ -z "$jar" ]; then
   if ! command -v java >/dev/null 2>&1; then
     log "Java 17+ is required to run the language server JAR."
-    log "  Run the install-nextflow skill, or put a native 'nlsp' binary on PATH."
+    log "  Run the install-nextflow skill to install it."
     exit 1
   fi
 
