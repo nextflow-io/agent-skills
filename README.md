@@ -23,7 +23,6 @@ The plugin uses the official [Nextflow language server](https://github.com/nextf
 ### Claude Code
 
 ```
-
 /plugin marketplace add nextflow-io/agent-skills
 /plugin install nextflow@nextflow-io-agent-skills
 ```
