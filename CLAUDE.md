@@ -22,7 +22,7 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 - `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP).
 - `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
 - `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
-- `migrate-nextflow-code` — migrates pipeline code to newer language requirements via a detect → fix → verify loop.
+- `migrate-nextflow-code` — migrates pipeline code to newer language features.
 
 When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
 

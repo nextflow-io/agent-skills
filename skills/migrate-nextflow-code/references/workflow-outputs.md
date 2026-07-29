@@ -1,48 +1,69 @@
 # Workflow Outputs Migration
 
-Nextflow's **workflow output definition** replaces the legacy `publishDir` directive. Instead of each process deciding where its files land, the entry workflow publishes *channels* through a `publish:` section, and a top-level `output {}` block declares where each published channel's files go. The goal of this migration is to move every `publishDir` into a single `output {}` block **without changing which files are published or where they end up**.
+Nextflow's **workflow output definition** replaces the legacy `publishDir` directive. Instead of each process deciding where to publish files, the entry workflow publishes *channels* through a `publish:` section, and a top-level `output {}` block declares where to publish the files in each channel. The goal of this migration is to move every `publishDir` into a single `output {}` block **without changing which files are published or where they end up**.
 
-Stable since Nextflow 25.10; this skill assumes **26.04 or later**. Do not use the old `nextflow.preview.output` feature flag — it is no longer needed.
+Stable since Nextflow 25.10; this skill assumes **26.04 or later**.
 
 Reference:
 - https://docs.seqera.io/nextflow/workflow#outputs
 - https://docs.seqera.io/nextflow/tutorials/workflow-outputs
 
-## Before you start: records vs. tuples
+## Before you start: skinny tuples vs fat records
 
-Workflow outputs work best with **records** — channel values that are maps with named fields (`sample.fastq_1`, `sample.id`). While workflow outputs can be used with tuples (e.g. `tuple val(meta), path(reads)`), they are far cleaner when the published channel carries records.
+Many pipelines model intermediate data as channels of **skinny tuples** — tuples of the form `(meta, file)`, one tuple channel for each output file. For large pipelines, this pattern leads to many intermediate channels. This is problematic for the `output` block because every channel must be propagated to the entry workflow in order to be published. It can be done, but the end result will be extremely verbose, with many more emits than before.
 
-- **Small pipeline (a handful of published outputs):** proceed with the migration — add a `.map { meta, file -> meta + [field: file] }` to transform the final channel when it is published.
-- **Large pipeline still on tuples:** **STOP** and recommend the [tuples → records migration](static-typing.md) first — without named fields, a big pipeline produces a sprawling diff with many workflow emits.
+The `output` block works best with channels of **fat records** — a single record channel containing all per-sample output files. Each workflow joins the outputs from different processes and emits one record channel rather than many tuple channels. This pattern makes it *significantly* easier to migrate from `publishDir` to the `output` block.
 
-If the channels already carry records, proceed.
+Before migrating a pipeline to workflow outputs, assess the impact:
 
-## The loop: detect → fix → verify
+- **Any pipeline using fat records:** proceed.
+
+- **Small pipeline using skinny tuples:** proceed.
+
+- **Large pipeline using skinny tuples:** **STOP** and recommend the [tuples → records migration](static-typing.md) first.
+
+## The migration loop
 
 ### Step 1: Detect
 
-There is no linter for this migration — inventory the existing publishing first. Find every `publishDir` declaration, in both process scripts and config:
+Inventory the current publishing behavior:
 
-```bash
-grep -rn "publishDir" --include=*.nf --include=*.config .
-```
+- `publishDir` settings in config
+- `publishDir` directives in process definitions
+- `collectFile` operators that publish via `storeDir:`
 
-For each match, record three things: **what** files it publishes (the process output / `pattern:`), **where** they go (the path, including any `saveAs:` closure), and **under what condition** (`enabled:`, surrounding `if`).
+For each match, record the following:
+
+- **Which process** is targeted. Each `publishDir` can target one or more processes based on how it is declared in the config. A catch-all `publishDir` targets all processes that are not captured by a more specific `publishDir` (e.g. a `withName` selector).
+- **Which files** are published. By default, `publishDir` publishes all output files declared by the process. It may use the `pattern:` option to publish specific outputs. It may use `enabled:` to toggle the entire declaration based on some condition.
+- **Where** files are published. Each `publishDir` specifies a target directory path. It may use a `saveAs:` closure to specify per-file mappings.
 
 ### Step 2: Fix
 
-Work top-down, one published output at a time:
+Migrate one published output at a time:
 
-1. **Identify the channel** in the entry workflow that carries each set of published files. Outputs produced deep in a subworkflow must be surfaced: add them to the subworkflow's `emit:` block so they propagate up to the entry workflow.
-2. **Add a `publish:` section** to the entry `workflow {}`, assigning each output a name: `samples = ch_samples`.
-3. **Add a top-level `output {}` block** with a matching entry per name, carrying the `path` / `index` directives as needed (see the table below).
-4. **Delete the `publishDir` directives** you replaced.
-5. **Set publishing config** once, globally, instead of per-process `mode:`/`outputDir`:
+1. **Propagate process outputs** up the call tree (via `emit:`) to the entry workflow so that they can be published.
+2. **Add a `publish:` section** to the entry workflow, assigning each output a name: `samples = ch_samples`.
+3. **Add a top-level `output {}` block** with a matching entry and `path` directive for each published channel (see the table below).
+4. **Delete the `publishDir` directives** you replaced. Delete surrounding config files when they are left empty.
 
-   ```groovy
-   outputDir = params.outdir            // keep the existing --outdir CLI flag working
-   workflow.output.mode = params.publish_dir_mode
-   ```
+Define global publishing behavior once in config:
+
+```groovy
+outputDir = params.outdir // keeps the existing --outdir CLI option working
+workflow.output.mode = params.publish_dir_mode
+```
+
+Override settings like `mode` in the `output` block as needed:
+
+```nextflow
+output {
+    samples {
+        path '...'
+        mode 'symlink'
+    }
+}
+```
 
 Apply the **smallest behavior-preserving change** — same files, same destination paths, same conditions. This migration is not a refactor of pipeline logic.
 
@@ -50,125 +71,146 @@ Apply the **smallest behavior-preserving change** — same files, same destinati
 
 Run `nextflow lint -o concise .` after the migration to make sure there are no errors.
 
-The pipeline should produce the **exact same output tree** as before. Run the test profile both before and after and compare:
+The pipeline should produce the **same output tree** as before. Run the test profile both before and after and compare:
 
 ```bash
-nextflow run . -profile test,docker --outdir results
+nextflow run . -profile test,docker --outdir results -resume
 ```
 
-Compare the published directory structure against a pre-migration run (`diff -r` the two `results/` trees, or compare `find results -type f | sort`). Every file should appear in the same relative location.
+Compare the published directory structure against a pre-migration run. Every file should appear in the same relative location.
+
+Results may differ due to different embedded output paths, timestamps, etc. These differences are acceptable as long as the results are semantically equivalent.
 
 ## Reference: publishDir → output block
 
-| `publishDir` form | ✅ `output {}` equivalent |
-|-------------------|---------------------------|
-| `publishDir "${params.outdir}/foo"` | Declare the channel in `publish:`, then `output { x { path 'foo' } }` (the `params.outdir` root moves to `outputDir`) |
-| `publishDir mode: 'copy'` (repeated on every process) | Set once: `workflow.output.mode = 'copy'` in config |
-| `publishDir "${params.outdir}/foo/${meta.id}"` (path depends on the value) | Dynamic path closure: `path { sample -> "foo/${sample.id}" }` |
-| `publishDir saveAs: { fn -> ... }` | Dynamic `path { }` closure, or route individual files with `>>` |
-| Multiple `publishDir` with `pattern:` sending files to different dirs | One `path { r -> r.a >> 'dirA/'; r.b >> 'dirB/' }` closure — route each file with `>>` |
-| `publishDir enabled: params.save_x` (conditional) | Gate inside the closure: `path { r -> r.file >> (params.save_x ? 'dir/' : null) }` |
+### Basic publishing
 
-Directives available inside an output entry: `path` (static string or closure), `index` (`path`, `header`, `sep`). Config-scope settings (`mode`, `overwrite`, `storageClass`, …) go under `workflow.output.*`.
-
-### The `>>` operator and index files
-
-When one channel value carries several files that go to different places, use the `>>` operator inside the `path` closure. **Only files routed with `>>` are published** in this form:
+Migrate a basic `publishDir` as follows:
 
 ```nextflow
+// before
+process FOO {
+    publishDir "${params.outdir}/foo", mode: 'copy'
+
+    input:
+    // ...
+
+    output:
+    tuple val(meta), path('...')
+
+    // ...
+}
+
+// after
+workflow {
+    main:
+    ch_samples = FOO(/* ... */)
+
+    publish:
+    samples = ch_samples
+}
+
+output {
+    samples {
+        // params.outdir root moves to outputDir
+        path 'foo'
+
+        // mode moves to workflow.output.mode, override here only if needed
+        // mode 'copy'
+    }
+}
+```
+
+You don't need to manually extract or flatten files from a channel — just emit and publish it directly. Nextflow automatically extracts files from data structures (lists, maps, records, tuples).
+
+### Publishing per-sample
+
+When the publish path depends on a per-sample value, use a dynamic `path` closure:
+
+```nextflow
+// before
+publishDir "${params.outdir}/foo/${meta.id}"
+
+// after
+output {
+    samples {
+        path { sample -> "foo/${sample.id}" }
+    }
+}
+```
+
+### Publishing per-file
+
+When a `publishDir` sends individual files to different places via `pattern:` or `saveAs:`, use the `>>` operator inside the `path` closure:
+
+```nextflow
+// before
+publishDir '...', pattern: '...'
+publishDir '...', saveAs: { fn -> /* ... */ }
+
+// after
 output {
     samples {
         path { sample ->
             sample.fastq_1 >> 'fastq/'
             sample.fastq_2 >> 'fastq/'
-            sample.bam     >> (params.save_bams ? "align/" : null)
-        }
-        index {
-            path 'samplesheet/samplesheet.csv'
-            header true
+            sample.bam     >> 'align/'
         }
     }
 }
 ```
 
-The `index` directive writes a CSV/JSON/YAML catalog of the channel's values (with metadata preserved) — this is what replaces a hand-rolled "create a samplesheet" process.
+Only files routed with `>>` are published when using this form. If the publish target ends with a slash, the source files are published *into* it; otherwise, the source file is published *as* the target name.
 
-## Worked example (rnaseq-nf)
+### Conditional publishing
 
-The [workflow outputs tutorial](https://docs.seqera.io/nextflow/tutorials/workflow-outputs) migrates the `rnaseq-nf` pipeline in stages — a good template for the general approach.
-
-**Start:** processes published with `publishDir`. Replace those directives with a `publish:` section in the entry workflow and a matching `output {}` block:
+When a `publishDir` conditionally publishes files via `enabled:`, use the `enabled` directive or gate inside the `path` closure:
 
 ```nextflow
-workflow {
-    main:
-    read_pairs_ch = channel.fromFilePairs(params.reads, checkIfExists: true, flat: true)
-    rnaseq = RNASEQ(read_pairs_ch, params.transcriptome)
-    multiqc_files = rnaseq.fastqc.mix(rnaseq.quant).collect()
-    multiqc_report = MULTIQC(multiqc_files, params.multiqc)
+// before
+publishDir 'align', enabled: params.save_bams
 
-    publish:
-    fastqc_logs    = rnaseq.fastqc
-    multiqc_report = multiqc_report
-}
-
+// after (alt 1)
 output {
-    fastqc_logs {
-    }
-    multiqc_report {
+    samples {
+        path 'align'
+        enabled params.save_bams
     }
 }
-```
 
-Set the publish mode once in config instead of per-process: `workflow.output.mode = 'copy'`.
-
-**Then refine to records + index file.** The cleanest result joins the per-sample channels into a **record** with named fields, so the output block can route each file by name and emit a samplesheet via `index`:
-
-```nextflow
-workflow {
-    main:
-    // ...
-    samples_ch = rnaseq.fastqc
-        .join(rnaseq.quant)
-        .map { id, fastqc, quant -> [id: id, fastqc: fastqc, quant: quant] }
-    multiqc_files = samples_ch.flatMap { s -> [s.fastqc, s.quant] }.collect()
-    multiqc_report = MULTIQC(multiqc_files, params.multiqc)
-
-    publish:
-    samples        = samples_ch
-    multiqc_report = multiqc_report
-}
-
+// after (alt 2)
 output {
     samples {
         path { sample ->
-            sample.fastqc >> "fastqc/${sample.id}"
-            sample.quant  >> "quant/${sample.id}"
+            // ...
+            sample.bam >> (params.save_bams ? "align/" : null)
         }
-        index {
-            path 'samples.csv'
-            header true
-        }
-    }
-    multiqc_report {
     }
 }
 ```
 
-The `index` produces a catalog of the published values:
+If a `publishDir` specifies `enabled: false`, it is a no-op — delete it.
 
-```csv
-"id","fastqc","quant"
-"lung","results/fastqc/lung","results/quant/lung"
-"gut","results/fastqc/gut","results/quant/gut"
+### Index files
+
+The `index` directive writes a CSV/JSON/YAML catalog of the channel's values (with metadata preserved):
+
+```nextflow
+output {
+    samples {
+        path { /* ... */ }
+        index {
+            path 'samplesheet.csv'
+            header true
+        }
+    }
+}
 ```
 
-Note how the record's named fields (`sample.id`, `sample.fastqc`) make the dynamic `path` closure and the index file straightforward — the payoff of migrating to records first.
+It can replace a `collectFile` operation or a hand-rolled "create a samplesheet" process. However, such a refactor might not be trivial — flag any opportunities for  `index` refactoring as follow-up work.
 
 ## Critical rules for this migration
 
-1. **CHECK RECORDS FIRST** — If the pipeline is large and still uses tuples (`tuple val(meta), path(...)`) rather than records, STOP and recommend the [tuples → records migration](static-typing.md) first. Workflow outputs are much easier with named record fields.
-2. **INVENTORY BEFORE EDITING** — `grep` every `publishDir` (scripts and config) and record what/where/condition for each before changing anything. Never guess.
-3. **publish: AND output {} MUST MATCH** — Every name assigned in `publish:` must be declared in `output {}`, and vice versa.
-4. **MATCH THE CLOSURE TO THE CHANNEL** — A dynamic `path { ... }` closure's parameters must match the structure of the published channel's values.
-5. **VERIFY BY DIFFING** — Compare the published directory tree before and after; it must be identical. Run the project's tests to confirm.
+1. **CHECK RECORDS FIRST** — If the pipeline is large and still uses tuples (`tuple val(meta), path(...)`) rather than records, STOP and recommend the [tuples → records migration](static-typing.md) first. Workflow outputs are much easier with fat records.
+2. **INVENTORY BEFORE EDITING** — Find every `publishDir` (scripts and config) and record what/where/condition for each before changing anything.
+3. **VERIFY BY DIFFING** — Compare the published directory tree before and after; it must be identical. Run the project's tests to confirm.

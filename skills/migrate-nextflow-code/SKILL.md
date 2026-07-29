@@ -30,7 +30,6 @@ If the request covers multiple migrations, recommend performing only the first m
 
 These hold regardless of which reference file you load:
 
-1. **Detect before editing** — run the migration's detection tool (e.g. `nextflow lint`) and work from its actual output. Never guess at what needs changing.
+1. **Detect before editing** — follow the reference guidelines to determine what needs changing. Never guess.
 2. **Preserve behavior** — a migration adapts code to new language requirements; it is not a refactor. Apply the smallest change that resolves each issue and leave unrelated logic alone.
-3. **Loop until clean** — re-run the detection tool after each batch of fixes and repeat until it reports nothing.
-4. **Verify** — run the project's tests (`nf-test test`, or `nextflow run . -profile test,docker`) to confirm behavior is unchanged before declaring the migration done.
+3. **Verify** — run the project's tests (`nf-test test`, or `nextflow run . -profile test,docker -resume`) to confirm behavior is unchanged before declaring the migration done.

@@ -35,8 +35,8 @@ Re-run `nextflow lint -o concise .` after each batch of fixes and repeat until t
 Finally, confirm behavior is unchanged. Prefer the project's own test suite:
 
 ```bash
-nf-test test          # if the pipeline uses nf-test
-nextflow run . -profile test,docker --outdir results   # otherwise, a test profile run
+nf-test test                                                    # if the pipeline uses nf-test
+nextflow run . -profile test,docker --outdir results -resume    # otherwise, a test profile run
 ```
 
 ## Reference: strict syntax fixes
@@ -89,7 +89,7 @@ Always fix the following deprecation warnings. Other warnings don't need to be f
 ## Gotchas from real migrations
 
 - **A closure variable cannot share a name with a variable in the workflow definition.** The strict parser treats this as a shadowing conflict. Rename the closure parameter (e.g. `reads` → `reads_`) rather than the channel.
-- **Most config `if` statements can simply be deleted, not rewritten.** Because the strict parser validates process selectors even for conditionally-included processes, the protective `if` wrapper around a process-selector config block is usually redundant. (Seen in [nf-core/sarek#2159](https://github.com/nf-core/sarek/pull/2159).)
+- **Most config `if` statements can simply be deleted, not rewritten.** Because the strict parser validates process selectors even for conditionally-included processes, the protective `if` wrapper around a process-selector config block is usually redundant.
 - **CLI params are no longer auto-cast.** With the strict parser, `--flag false` arrives as the string `'false'` (which is truthy). Convert explicitly (`params.flag.toBoolean()`) or declare a typed `params` block. Watch for this when behavior changes after migration even though parsing succeeds.
 
 ## Escape hatch: `lib/` directory

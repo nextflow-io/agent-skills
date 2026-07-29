@@ -57,7 +57,7 @@ Finally, confirm behavior is unchanged by performing a test run:
 
 ```bash
 # profile names and params may vary by pipeline
-nextflow run . -profile test,docker --outdir results
+nextflow run . -profile test,docker --outdir results -resume
 ```
 
 The output directory (`results`) must match a pre-migration run.
