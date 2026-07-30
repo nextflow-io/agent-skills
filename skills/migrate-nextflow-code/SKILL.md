@@ -1,6 +1,6 @@
 ---
 name: migrate-nextflow-code
-description: Migrate Nextflow pipeline code to newer language requirements. Use when fixing strict syntax errors, migrating from `publishDir` to workflow outputs (the `output {}` block), or adding static typing (typed processes/workflows, records, typed params).
+description: Migrate Nextflow pipeline code to newer language requirements. Use when fixing strict syntax errors, replacing versions channels with topic channels, migrating from `publishDir` to workflow outputs (the `output {}` block), or adding static typing (typed processes/workflows, records, typed params).
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep
 ---
 
@@ -19,12 +19,13 @@ This SKILL.md is an **index**. Identify which migration the user needs from the 
 | Migration | Use when the user… | Read this file |
 |-----------|--------------------|----------------|
 | **Strict syntax** | …has strict syntax errors, or asks to run `nextflow lint` to find and fix errors | [`references/strict-syntax.md`](references/strict-syntax.md) |
+| **Topic channels** | …wants to replace the `ch_versions` plumbing (or another channel threaded through every workflow) with a topic channel | [`references/topic-channels.md`](references/topic-channels.md) |
 | **Static typing** | …wants to add static types — typed process/workflow inputs and outputs, records (replacing tuples), or typed params | [`references/static-typing.md`](references/static-typing.md) |
 | **Workflow outputs** | …wants to replace `publishDir` directives with workflow outputs — a top-level `output {}` block and a `publish:` section in the entry workflow | [`references/workflow-outputs.md`](references/workflow-outputs.md) |
 
 If the request matches no row, tell the user which migrations are currently supported rather than improvising.
 
-If the request covers multiple migrations, recommend performing only the first matching migration in the table. The order is also a dependency order: strict syntax -> static typing -> workflow outputs. Do not try to perform multiple migrations at the same time.
+If the request covers multiple migrations, recommend performing only the first matching migration in the table. The order is also a dependency order: strict syntax -> topic channels -> static typing -> workflow outputs. Do not try to perform multiple migrations at the same time.
 
 ## Shared principles (all migrations)
 

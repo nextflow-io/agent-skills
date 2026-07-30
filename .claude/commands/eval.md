@@ -1,13 +1,13 @@
 ---
 description: Evaluate the migrate-nextflow-code skill
-argument-hint: <strict-syntax|static-typing|workflow-outputs> <github-url> [branch]
+argument-hint: <strict-syntax|topic-channels|static-typing|workflow-outputs> <github-url> [branch]
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill
 ---
 
 Evaluate the `migrate-nextflow-code` skill by attempting a real migration on a real Nextflow pipeline.
 
 Arguments:
-- `$1` — which migration to evaluate: one of `strict-syntax`, `static-typing`, `workflow-outputs` (required)
+- `$1` — which migration to evaluate: one of `strict-syntax`, `topic-channels`, `static-typing`, `workflow-outputs` (required)
 - `$2` — GitHub URL of the pipeline to migrate (required)
 - `$3` — branch to check out (optional; default branch if omitted)
 
