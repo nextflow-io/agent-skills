@@ -13,16 +13,16 @@ Inputs (`take:`)
 | `ch_samples` | `ch_samples: Channel<Sample>` |
 | input file (from params) | `fasta: Path` |
 | input file (from upstream process) | `val_fasta: Value<Path>` |
-| optional input | `val_index: Value<Path>?` or `index: Path?` |
+| optional input | `val_index: Value<Path?>` or `index: Path?` |
 
 Outputs (`emit:`)
 
 | Untyped | ✅ Typed |
 |---------|----------|
 | per-sample channel output | `results: Channel<MethylseqResult> = ch_results` |
-| optional singleton output | `multiqc_report: Value<Path>? = val_report` |
+| optional singleton output | `multiqc_report: Value<Path?> = val_report` |
 
-Inside the body, build a result channel by `join`-ing the per-step record channels on a shared field (e.g. `by: 'id'`) so each sample's outputs collapse into one fat record that matches the emitted record type.
+Inside the body, join the per-sample result channels into one fat record channel with a single unified record type (see below).
 
 ## Record types
 
@@ -31,14 +31,23 @@ Record types can be defined and included across scripts. In practice, record typ
 ```nextflow
 workflow ALIGN {
     take:
-    samples: CHannel<Sample>
+    samples: Channel<Sample>
 
     // ...
+
+    emit:
+    aligned: Channel<AlignedSample>
 }
 
 record Sample {
     meta: Map
     reads: List<Path>
+}
+
+record AlignedSample {
+    meta: Map
+    bam: Path
+    bai: Path
 }
 ```
 
@@ -46,7 +55,7 @@ Use `record(field: value, ...)` to construct a record and `r + record(extra: v)`
 
 Records are **duck-typed**: a value satisfies a record type if it has at least the declared fields. The type checker will tell you if a call site has a record mismatch.
 
-## Operators under typing
+## Dataflow logic
 
 Migrating dataflow logic to static typing consists of:
 
@@ -58,19 +67,15 @@ The typed operators are `collect, combine, filter, flatMap, groupBy, join, map, 
 
 ### Trivial renames
 
-These are direct substitutions:
-
 | Avoid / changed | ✅ Use under typing |
 |-----------------|---------------------|
-| `Channel.of(...)` (capitalized factory) | `channel.of(...)` — the factory is lowercase |
+| `Channel.of(...)` (capitalized) | `channel.of(...)` (lowercase) |
 | `.set { x }` / `.tap { x }` | plain assignment: `x = ch` |
 | `.join(other)` | `.join(other, by: 'id')` — `by` is required |
 | `.mix(a, b, c)` | chain: `.mix(a).mix(b).mix(c)` |
 | `.distinct()` | `.unique()` |
-| implicit closure param `it` | name it: `{ r -> ... }` |
+| implicit closure param `it` | explicit param: `{ r -> ... }` |
 | `.collectFile(...)` | deferred — see [acceptable residual warnings](static-typing.md#acceptable-residual-warnings) |
-
-The structural transformations below need more than a rename.
 
 ### `.out` access — single vs. multi-output
 
@@ -97,9 +102,9 @@ bam = FOO(ch)   // bam is the output channel directly
 ch | FOO | BAR
 FOO & BAR
 
-// ✅ explicit intermediate assignments
-foo_out = FOO(ch)
-bar_out = BAR(foo_out)
+// ✅ explicit calls
+BAR(FOO(ch))
+FOO(ch) ; BAR(ch)
 ```
 
 ### `.branch { }` → one `.filter` per branch
@@ -112,8 +117,8 @@ ch.branch { r ->
 }
 
 // ✅ one filter per branch (add a .map if you were reshaping in the branch)
-ch_aspera = ch.filter { r -> r.method == 'aspera' }
-ch_ftp    = ch.filter { r -> r.method == 'ftp' }
+ch.filter { r -> r.method == 'aspera' }
+ch.filter { r -> r.method == 'ftp' }
 ```
 
 ### `.multiMap { }` → pass records directly, or one `.map` per output
@@ -126,8 +131,8 @@ ch.multiMap { r ->
 }
 
 // ✅ one map per output (or just pass the record through and access fields downstream)
-reads = ch.map { r -> r.reads }
-meta  = ch.map { r -> r.meta }
+ch.map { r -> r.reads }
+ch.map { r -> r.meta }
 ```
 
 ### `.groupTuple()` → `.groupBy()`
@@ -181,4 +186,101 @@ process ALIGN {
 }
 aligners = channel.of('bwa', 'bowtie2')
 ALIGN(ch_reads.combine(aligners))
+```
+
+## Tips & tricks
+
+Here are some common patterns to use while navigating the type checker.
+
+### Multiple channel inputs
+
+Processes cannot be called with multiple channel inputs. Combine multiple inputs into a single source with `combine` instead.
+
+When the inputs consist of a per-sample record channel and one or more dataflow values, you can use `combine` with named args to append the value to each sample record:
+
+```nextflow
+samples = channel.of( record(id: 1, fastq: file('1.fq')) )
+index = channel.value( file('index.fa') )
+ALIGN( samples.combine(strandedness: 'auto', index: index) )
+```
+
+You would also update `ALIGN` to declare a single combined record input.
+
+### Conditional process outputs
+
+A common pattern is to assign a channel to a process output, or an empty channel if the process is skipped:
+
+```nextflow
+ch_fastqc = channel.empty()
+
+if (!params.skip_fastqc) {
+    ch_fastqc = FASTQC(...)
+}
+```
+
+The type checker will complain about this because `ch_fastqc` will be typed as `Channel<?>` and any downstream operation (e.g. `ch_fastqc.map { r -> ... }`) will not be able to see the actual record fields from `FASTQC`. Assign the empty channel in an `else` instead:
+
+```nextflow
+if (!params.skip_fastqc) {
+    ch_fastqc = FASTQC(...)
+}
+else {
+    ch_fastqc = channel.empty()
+}
+```
+
+### Skinny tuples vs fat records
+
+A common workflow pattern is to call several processes on a single input channel and emit each result separately:
+
+```nextflow
+workflow BAM_STATS_SAMTOOLS {
+    take:
+    ch_samples // channel: [ val(meta), path(fastq) ]
+
+    main:
+    FOO(ch_samples)
+    BAR(ch_samples)
+    BAZ(ch_samples)
+
+    emit:
+    foo = FOO.out // channel: [ val(meta), path(foo) ]
+    bar = BAR.out // channel: [ val(meta), path(bar) ]
+    baz = BAZ.out // channel: [ val(meta), path(baz) ]
+}
+```
+
+These channels are called **skinny tuples** because they contain thin vertical slices of related per-sample results.
+
+With records it is better to join these channels into a single **fat record** channel:
+
+```nextflow
+workflow BAM_STATS_SAMTOOLS {
+    take:
+    ch_samples: Channel<Sample>
+
+    main:
+    ch_foo = FOO(ch_samples)
+    ch_bar = BAR(ch_samples)
+    ch_baz = BAZ(ch_samples)
+
+    ch_results = ch_foo
+        .join(ch_bar, by: 'meta')
+        .join(ch_baz, by: 'meta')
+
+    emit:
+    ch_results as Channel<FooBarBaz>
+}
+
+record Sample {
+    meta: Map
+    fastq: Path
+}
+
+record FooBarBaz {
+    meta: Map
+    foo: Path
+    bar: Path
+    baz: Path
+}
 ```
