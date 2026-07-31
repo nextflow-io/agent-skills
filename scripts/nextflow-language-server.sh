@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 #
-# Launcher for the official Nextflow language server, used by the plugin's LSP
-# integration (see .lsp.json). It gives the agent real-time diagnostics,
-# go-to-definition, and hover info for `.nf` scripts and `nextflow.config` files.
+# Launcher for the official Nextflow language server, used by nextflow-typecheck.sh
+# to collect diagnostics for `.nf` scripts and `nextflow.config` files.
 # Source: https://github.com/nextflow-io/language-server
 #
 # JAR management mirrors the Nextflow VS Code extension (fetchLanguageServer.ts):

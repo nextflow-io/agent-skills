@@ -8,5 +8,5 @@
   },
   "repository": "https://github.com/nextflow-io/agent-skills",
   "license": "Apache-2.0",
-  "keywords": ["nextflow", "nextflow-registry", "nf-core", "bioinformatics", "seqera", "workflows", "lsp", "language-server"]
+  "keywords": ["nextflow", "nextflow-registry", "nf-core", "bioinformatics", "seqera", "workflows"]
 }

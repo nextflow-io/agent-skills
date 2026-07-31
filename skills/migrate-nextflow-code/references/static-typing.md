@@ -25,18 +25,16 @@ Static typing is enabled per-script by enabling a feature flag at the top:
 nextflow.enable.types = true
 ```
 
-Type checking is provided by the Nextflow language server, which is included in this plugin.
+`nextflow lint` only does syntax checks — it will **not** report type errors. Type checking is provided by the Nextflow language server, which the plugin bundles as a script:
 
-- After you edit a `.nf` or `nextflow.config` file, you will receive diagnostics automatically.
-- Some type mismatches are reported as errors while others are reported as warnings -- make sure to check both.
-- **Hover a variable or call site to see its inferred type.** The language server serves type hints over LSP hover — use them to inspect a value whose type isn't obvious from the code, e.g. which fields a bare `Record` actually carries. This tells you what the type checker sees, which is faster than guessing when a type mismatch occurs.
-- **Pushed diagnostics identify a file by its name only.** In a pipeline with many identically-named module files (`modules/*/main.nf`), you may not be able to tell which `main.nf` a diagnostic belongs to. In this case, you can run the bundled fallback for repo-relative paths:
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh <project-dir>
+```
 
-  ```bash
-  ${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh <project-dir>
-  ```
+It runs the language server headlessly over the whole project and prints one line per diagnostic, with the path relative to the project root. Exit code is 1 if any errors were found. Run it after each round of edits — it is the only way to see type errors.
 
-  It drives the same language server headlessly and prints one line per diagnostic, with the path relative to the project root.
+- Some type mismatches are reported as errors while others are reported as warnings — make sure to check both.
+- The first run downloads the language server jar (~1 min); later runs reuse the cached jar. A full scan takes a few seconds to a minute depending on project size, so batch your edits rather than re-running it after every single change.
 
 ## The migration loop
 
@@ -45,7 +43,7 @@ For each file:
 1. Add `nextflow.enable.types = true`.
 2. Migrate the script definitions following the [reference pages](#reference-pages) below.
 3. Replace tuples with records; define record types as needed.
-4. Read the diagnostics, fix, and repeat.
+4. Run `nextflow-typecheck.sh`, read the diagnostics, fix, and repeat.
 
 Work **outward from the leaves**: type the processes first, then the subworkflows that call them, then the entry workflow and params. A typed process forces its callers to provide correctly-shaped records, so the errors guide you up the call tree.
 

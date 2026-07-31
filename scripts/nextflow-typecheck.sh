@@ -26,13 +26,11 @@
 
 set -euo pipefail
 
-# Delegate server resolution/launch to the shared launcher, and reuse the LSP settings
-# from .lsp.json, so this script and the LSP integration stay in sync ($NEXTFLOW_LSP_JAR
-# / cached-or-downloaded jar; errorReportingMode; exclude list).
+# Delegate server resolution/launch to the shared launcher ($NEXTFLOW_LSP_JAR, or a
+# cached/downloaded jar).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$SCRIPT_DIR/..}"
 LAUNCHER="$PLUGIN_ROOT/scripts/nextflow-language-server.sh"
-LSP_CONFIG="$PLUGIN_ROOT/.lsp.json"
 
 IDLE=3            # seconds of silence that means "scan finished"
 FIRST_TIMEOUT=90  # seconds to wait for the first diagnostic before giving up
@@ -47,15 +45,13 @@ done
 
 command -v jq >/dev/null 2>&1 || { echo "Required tool not found on PATH: jq" >&2; exit 1; }
 [[ -x "$LAUNCHER" ]] || { echo "Language server launcher not found or not executable: $LAUNCHER" >&2; exit 1; }
-[[ -f "$LSP_CONFIG" ]] || { echo "LSP config not found: $LSP_CONFIG" >&2; exit 1; }
 
 WS_ABS="$(cd "$WORKSPACE" 2>/dev/null && pwd)" || { echo "Not a directory: $WORKSPACE" >&2; exit 1; }
 
-# Reuse the LSP settings from .lsp.json (single source of truth) — the settings block
-# sent to the server, and the exclude list used to prune the file search below.
-SETTINGS_JSON="$(jq -c '.nextflow.settings' "$LSP_CONFIG")"
-[[ -n "$SETTINGS_JSON" && "$SETTINGS_JSON" != "null" ]] || { echo "No .nextflow.settings in $LSP_CONFIG" >&2; exit 1; }
-mapfile -t EXCLUDES < <(jq -r '.nextflow.settings.nextflow.files.exclude[]?' "$LSP_CONFIG")
+# Settings pushed to the server: WARNINGS mode reports errors plus normal warnings (type
+# mismatches surface as warnings); the exclude list also prunes the file search below.
+EXCLUDES=(.git .nextflow work .nf-test node_modules .venv)
+SETTINGS_JSON="$(jq -cn --args '{nextflow:{errorReportingMode:"WARNINGS",files:{exclude:$ARGS.positional}}}' "${EXCLUDES[@]}")"
 
 # --- launch the server with FIFOs for stdio ---------------------------------
 WORKDIR="$(mktemp -d)"
@@ -97,9 +93,8 @@ send() {
 ROOT_URI="file://$WS_ABS"
 
 # initialize → initialized → didChangeConfiguration.
-# Pushing the .lsp.json settings (a non-default errorReportingMode/exclude) is what makes
-# the server (re)scan the workspace. Its WARNINGS mode reports errors plus normal warnings
-# (type mismatches surface as warnings).
+# Pushing the settings (a non-default errorReportingMode/exclude) is what makes the server
+# (re)scan the workspace.
 send "$(jq -cn --arg uri "$ROOT_URI" --arg name "$(basename "$WS_ABS")" \
   '{jsonrpc:"2.0",id:1,method:"initialize",params:{processId:null,rootUri:$uri,capabilities:{workspace:{configuration:false}},workspaceFolders:[{uri:$uri,name:$name}]}}')"
 send '{"jsonrpc":"2.0","method":"initialized","params":{}}'

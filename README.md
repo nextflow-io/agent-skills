@@ -16,7 +16,13 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 
 ## Language server
 
-The plugin uses the official [Nextflow language server](https://github.com/nextflow-io/language-server) as a [Claude Code LSP server](https://code.claude.com/docs/en/plugins-reference#lsp-servers). When you edit a `.nf` script or `nextflow.config`, the agent gets real-time diagnostics (errors and warnings), go-to-definition, and hover info, so mistakes surface as you write. The `migrate-nextflow-code` skill relies on these diagnostics to drive code migrations.
+The plugin bundles a script that runs the official [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly and prints the diagnostics (errors and warnings) for a project:
+
+```bash
+scripts/nextflow-typecheck.sh <project-dir>
+```
+
+The `migrate-nextflow-code` skill uses it to drive the static typing migration, since `nextflow lint` does not currently perform type checking.
 
 ## Installation
 
