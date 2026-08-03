@@ -112,15 +112,17 @@ The following is a working list of common substitutions (from real migrations, n
 
 | Legacy pattern | Use instead |
 |----------------|-------------|
-| `list.flatten()` | not needed — avoid |
+| `list.flatten()` | `list.collectMany()` |
 | `list.sort()` | `list.toSorted()` |
 | `list.unique()` | `list.toUnique()` |
 | `map.clone(); map << [k: v]` | `map += [k: v]` |
 | `map.putAll(other)` | `map + other` |
 | `map.remove(k)` | `map.subMap(map.keySet() - [k])` |
 | `string.split(sep)` | `string.tokenize(sep)` |
+| `string.split(/regex/)` | `string.replaceAll(/…/, '…').tokenize(sep)` |
 | `x.toString()` | `"${x}"` |
 | '"' + x + '"' | `"\"${x}\""`
+| `task.memory.giga` / `.mega` | `task.memory.toGiga()` / `toMega()` |
 
 Additional gotchas worth calling out:
 
