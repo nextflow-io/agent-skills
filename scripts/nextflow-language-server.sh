@@ -4,23 +4,31 @@
 # to collect diagnostics for `.nf` scripts and `nextflow.config` files.
 # Source: https://github.com/nextflow-io/language-server
 #
-# JAR management mirrors the Nextflow VS Code extension (fetchLanguageServer.ts):
-# resolve the latest patch release of a stable version (e.g. v26.04) from GitHub,
-# cache it under ~/.nextflow/lsp/<prefix>/<version>.jar, and reuse it if present.
-#
-# The jar used is the latest patch of $NEXTFLOW_LSP_VERSION (default 26.04).
+# Resolution order:
+#   1. `nextflow-lsp` on PATH — a native build, no JVM needed.
+#   2. a jar, cached under ~/.nextflow/lsp/<prefix>/<version>.jar or downloaded from
+#      GitHub. This mirrors the Nextflow VS Code extension (fetchLanguageServer.ts):
+#      resolve the latest patch of a stable version (e.g. v26.04) and reuse it if present.
+#      The version tracked is $NEXTFLOW_LSP_VERSION (default 26.04).
 #
 # The server speaks LSP over stdio, so we `exec` to hand our stdio to it.
 
 set -euo pipefail
 
+log() { echo "nextflow-language-server: $*" >&2; }
+
+# 1. Native binary, if installed.
+if command -v nextflow-lsp >/dev/null 2>&1; then
+  log "using nextflow-lsp on PATH."
+  exec nextflow-lsp "$@"
+fi
+
+# 2. Fall back to the jar.
 # Stable version to track; the latest patch release is resolved at runtime.
 VERSION="${NEXTFLOW_LSP_VERSION:-26.04}"
 PREFIX="v${VERSION}"
 # Regex-escaped prefix for matching tag/file names like v26.04.1.
 PREFIX_RE="$(printf '%s' "$PREFIX" | sed 's/\./\\./g')"
-
-log() { echo "nextflow-language-server: $*" >&2; }
 
 if ! command -v java >/dev/null 2>&1; then
   log "Java 17+ is required to run the language server JAR."

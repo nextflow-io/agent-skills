@@ -9,7 +9,7 @@
 #
 # What it does:
 #   1. Resolves and launches the language server via scripts/nextflow-language-server.sh
-#      (a cached or downloaded jar).
+#      (the `nextflow-lsp` binary if it's on PATH, else a cached/downloaded jar).
 #   2. Initializes the given workspace and pushes config so errors and warnings are reported.
 #   3. Opens one .nf (and one .config) file to trigger a full-workspace scan, collects
 #      every published diagnostic, then shuts the server down.
