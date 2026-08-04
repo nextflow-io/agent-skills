@@ -9,8 +9,7 @@
 #
 # What it does:
 #   1. Resolves and launches the language server via scripts/nextflow-language-server.sh
-#      ($NEXTFLOW_LSP_JAR or a cached/downloaded jar — the same resolution logic the
-#      LSP integration uses).
+#      (a cached or downloaded jar).
 #   2. Initializes the given workspace and pushes config so errors and warnings are reported.
 #   3. Opens one .nf (and one .config) file to trigger a full-workspace scan, collects
 #      every published diagnostic, then shuts the server down.
@@ -26,8 +25,7 @@
 
 set -euo pipefail
 
-# Delegate server resolution/launch to the shared launcher ($NEXTFLOW_LSP_JAR, or a
-# cached/downloaded jar).
+# Delegate server resolution/launch to the shared launcher.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$SCRIPT_DIR/..}"
 LAUNCHER="$PLUGIN_ROOT/scripts/nextflow-language-server.sh"
