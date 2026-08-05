@@ -11,15 +11,18 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 ## Layout
 
 - `skills/<name>/SKILL.md` — one skill per directory; the directory name must match the `name:` in frontmatter.
+- Skills may bundle resources: `references/*.md` (loaded on demand). Shared executable helpers live in the top-level `scripts/` (e.g. `scripts/nextflow-language-server.sh`), referenced from skills via `${CLAUDE_PLUGIN_ROOT}/scripts/...`.
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
-- `.mcp.json` — declares the `seqera` MCP server (`https://mcp.seqera.io/mcp`) that `launch-workflow` depends on.
+- `scripts/nextflow-typecheck.sh` — drives the [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly (via `scripts/nextflow-language-server.sh`) and prints diagnostics (errors + warnings) for a project. This is how skills check for type errors; `nextflow lint` only checks syntax.
+- `.mcp.json` — declares the [Seqera MCP](https://mcp.seqera.io/mcp) server, which allows the agent to interact with Seqera Platform.
 
-## The four skills and how they relate
+## The skills and how they relate
 
 - `install-nextflow` — installs/upgrades Nextflow and the Java 17+ prerequisite (via SDKMAN). Other skills require **Nextflow 26.04+**.
 - `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP).
 - `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
 - `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
+- `migrate-nextflow-code` — migrates pipeline code to newer language features.
 
 When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
 
