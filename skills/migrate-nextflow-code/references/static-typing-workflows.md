@@ -269,7 +269,7 @@ workflow BAM_STATS_SAMTOOLS {
         .join(ch_baz, by: 'meta')
 
     emit:
-    results: Channel<FooBarBaz> = ch_results
+    ch_results as Channel<FooBarBaz>
 }
 
 record Sample {

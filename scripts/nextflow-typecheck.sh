@@ -23,8 +23,7 @@
 # Env:    NEXTFLOW_TYPECHECK_IDLE     seconds of silence that end the scan (default 10)
 #         NEXTFLOW_TYPECHECK_TIMEOUT  seconds to wait for the first diagnostic (default 90)
 #
-# Requires: jq, plus the launcher's own deps (java 17+; curl or wget).
-#         Runs on bash 3.2 (stock macOS) and later.
+# Requires: bash >=3.2, jq, the launcher's own deps (java >=17; curl or wget).
 # Network access on first run (to download the jar).
 
 set -euo pipefail
@@ -137,10 +136,8 @@ export LC_ALL=C
 
 # Read exactly $1 bytes from fd 4 and print them.
 #
-# `read -N` would be the obvious choice, but it needs bash 4.1+ and macOS ships
-# bash 3.2 — there it fails with "read: -N: invalid option", leaves $body unset,
-# and the scan times out with a misleading "language server may have failed to
-# start". `dd bs=1` issues single-byte reads, so it consumes exactly $1 bytes and
+# `read -N` requires bash 4.1+ and macOS ships bash 3.2
+# `dd bs=1` issues single-byte reads, so it consumes exactly $1 bytes and
 # never steals the head of the next frame the way a block-buffered `head -c` can.
 if read -N 0 </dev/null 2>/dev/null; then
   read_bytes() { local b; IFS= read -r -N "$1" b <&4 || true; printf '%s' "$b"; }

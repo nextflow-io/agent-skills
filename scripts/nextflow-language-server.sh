@@ -36,9 +36,7 @@ if ! command -v java >/dev/null 2>&1; then
   exit 1
 fi
 
-# Check the major version up front: the jar is built for 17+, and an older JVM
-# fails with an UnsupportedClassVersionError that surfaces to the caller as a
-# generic "the language server may have failed to start".
+# Check the major version up front: the jar requires Java 17+
 # Handles both the legacy `1.8.0_292` and the modern `17.0.9` / `21` forms.
 java_ver="$(java -version 2>&1 | sed -n 's/.*version "\([^"]*\)".*/\1/p' | head -n1 || true)"
 java_major="${java_ver%%[.-]*}"
@@ -55,8 +53,6 @@ case "$java_major" in
 esac
 
 cache_dir="${HOME}/.nextflow/lsp/${PREFIX}"
-# per_page=100: the default page size is 30, so older stable lines would drop off
-# the first page (and silently degrade to the cache-or-error path) as releases pile up.
 api="https://api.github.com/repos/nextflow-io/language-server/releases?per_page=100"
 
 # Fetch the releases list (anonymous, or authenticated to dodge rate limits).
@@ -108,14 +104,8 @@ jar="${cache_dir}/${resolved}.jar"
 if [ ! -f "$jar" ]; then
   mkdir -p "$cache_dir"
   url="https://github.com/nextflow-io/language-server/releases/download/${resolved}/language-server-all.jar"
-  # Download to a unique temp file in the same directory, so an interrupted run
-  # leaves no half-written jar behind and two concurrent runs cannot race. The
-  # final `mv` is atomic within the directory, so whoever finishes last wins.
-  tmp="$(mktemp "${cache_dir}/.${resolved}.jar.XXXXXX")"
-  trap 'rm -f "$tmp"' EXIT INT TERM
-  fetch "$url" "$tmp"
-  mv "$tmp" "$jar"
-  trap - EXIT INT TERM
+  fetch "$url" "${jar}.tmp"
+  mv "${jar}.tmp" "$jar"
   log "downloaded ${resolved}."
 else
   log "using cached ${resolved}."

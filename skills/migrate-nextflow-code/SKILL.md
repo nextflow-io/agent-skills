@@ -29,7 +29,7 @@ If the request covers multiple migrations, recommend performing only the first m
 
 ## Critical Rules
 
-These hold regardless of which reference file you load. Each reference file adds its own "Critical rules for this migration" on top of them.
+These hold regardless of which reference file you load. Each reference file adds its own migration-specific rules.
 
 1. **Detect before editing** — follow the reference guidelines to determine what needs changing. Never guess.
 2. **Preserve behavior** — a migration adapts code to new language requirements; it is not a refactor. Apply the smallest change that resolves each issue and leave unrelated logic alone.
