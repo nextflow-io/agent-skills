@@ -102,7 +102,26 @@ channel.topic('versions')
 
 ## The `when:` block
 
-Typed processes drop the `when: task.ext.when` idiom.
+Typed processes drop the `when: task.ext.when` idiom. There is no in-process replacement — [the docs](https://docs.seqera.io/nextflow/strict-syntax#process-when-section) direct you to move the condition into the **caller**:
+
+- **Condition depends on the input record** — filter the channel before the call:
+
+  ```nextflow
+  // before: process had `when: meta.single_end == false`
+  FOO(ch_samples.filter { s -> !s.single_end })
+  ```
+
+- **Condition is a pipeline-level flag** (a param, or `task.ext.when` set from config) — gate the call itself:
+
+  ```nextflow
+  // before: process had `when: task.ext.when`
+  if( params.run_foo )
+      ch_foo = FOO(ch_samples)
+  ```
+
+  A conditionally-assigned output channel is undefined on the `else` branch, so give it an empty default (`ch_foo = channel.empty()`) before the `if` when a downstream process consumes it.
+
+`when:` was evaluated per task, so the `.filter` predicate must be the same per-item condition — not a whole-channel one. Use the `if` form only when the condition is constant for the whole run.
 
 ## Standard library gotchas
 
@@ -121,14 +140,16 @@ The following is a working list of common substitutions (from real migrations, n
 | `string.split(sep)` | `string.tokenize(sep)` |
 | `string.split(/regex/)` | `string.replaceAll(/…/, '…').tokenize(sep)` |
 | `x.toString()` | `"${x}"` |
-| '"' + x + '"' | `"\"${x}\""`
+| `'"' + x + '"'` | `"\"${x}\""` |
 | `task.memory.giga` / `.mega` | `task.memory.toGiga()` / `toMega()` |
+
+**⚠️ `split` → `tokenize` is not a drop-in.** `split` takes a regex and keeps empty tokens; `tokenize` treats its argument as a *set* of delimiter characters and discards them. `'a,,b'.split(',')` yields 3 elements, `'a,,b'.tokenize(',')` yields 2. Where empty fields are meaningful (parsing a CSV row, a trailing separator), that is a silent behavior change — split the string a different way rather than accepting it.
 
 Additional gotchas worth calling out:
 
 - **`files("...")` returns a `Set<Path>` (unordered), not a `List`.** A `Set` has no `[]` indexing and no `.first()`. When order matters (read pairs `_1`/`_2`, or any `fastq[0]` access), use **`files("...").toSorted()`** to get an ordered `List<Path>`.
 
-- **The `collect()` operator returns `Value<Bag>` (unordered), not a `List`.** If a process input (or other consumer) is declared `List<T>`, feeding it a `collect()` result is a type mismatch (`Bag` ≠ `List`). Either convert the bag to a list with `toSorted()`, declare the consumer as `Bag<T>`.
+- **The `collect()` operator returns `Value<Bag>` (unordered), not a `List`** — its [typed signature](https://docs.seqera.io/nextflow/reference/operator-typed#collect) is `Channel<E> collect() -> Value<Bag<E>>`. If a process input (or other consumer) is declared `List<T>`, feeding it a `collect()` result is a type mismatch (`Bag` ≠ `List`). Either convert the bag to a list with `toSorted()`, or declare the consumer as `Bag<T>`. (The operators tutorial says typed `collect` "has the same semantics as `toList`" — that refers to flattening and empty-channel behavior, not the return type.)
 
 - **The `collect { }` and `findAll { }` iterable methods return an `Iterable`, not a `List`.** Convert with `toSorted()` (or `toList()` if you know the source is a list). For example, `def x = []` infers `List<E>`, so a later `x = coll.collect { }` fails (`Iterable` ≠ `List`) — use `coll.collect { }.toList()` instead.
 

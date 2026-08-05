@@ -15,6 +15,7 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
 - `scripts/nextflow-typecheck.sh` — drives the [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly (via `scripts/nextflow-language-server.sh`) and prints diagnostics (errors + warnings) for a project. This is how skills check for type errors; `nextflow lint` only checks syntax.
 - `.mcp.json` — declares the [Seqera MCP](https://mcp.seqera.io/mcp) server, which allows the agent to interact with Seqera Platform.
+- `.claude/commands/` — repo-local dev tooling, **not shipped to plugin users**. `eval.md` (`/eval <migration> <github-url> [branch]`) exercises a `migrate-nextflow-code` migration against a real pipeline cloned into `evals/<name>` and reports where the skill's instructions fall short. `evals/` is gitignored — never commit a cloned pipeline.
 
 ## The skills and how they relate
 

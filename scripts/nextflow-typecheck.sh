@@ -24,6 +24,7 @@
 #         NEXTFLOW_TYPECHECK_TIMEOUT  seconds to wait for the first diagnostic (default 90)
 #
 # Requires: jq, plus the launcher's own deps (java 17+; curl or wget).
+#         Runs on bash 3.2 (stock macOS) and later.
 # Network access on first run (to download the jar).
 
 set -euo pipefail
@@ -133,6 +134,19 @@ cfg="$WS_ABS/nextflow.config"
 # --- read framed messages until diagnostics go idle ------------------------
 # Read bytes (not characters) so multi-byte UTF-8 messages stay aligned with Content-Length.
 export LC_ALL=C
+
+# Read exactly $1 bytes from fd 4 and print them.
+#
+# `read -N` would be the obvious choice, but it needs bash 4.1+ and macOS ships
+# bash 3.2 — there it fails with "read: -N: invalid option", leaves $body unset,
+# and the scan times out with a misleading "language server may have failed to
+# start". `dd bs=1` issues single-byte reads, so it consumes exactly $1 bytes and
+# never steals the head of the next frame the way a block-buffered `head -c` can.
+if read -N 0 </dev/null 2>/dev/null; then
+  read_bytes() { local b; IFS= read -r -N "$1" b <&4 || true; printf '%s' "$b"; }
+else
+  read_bytes() { dd bs=1 count="$1" <&4 2>/dev/null; }
+fi
 got_any=0
 start=$SECONDS
 while :; do
@@ -148,7 +162,7 @@ while :; do
     continue
   fi
   [[ "$clen" -gt 0 ]] 2>/dev/null || continue
-  IFS= read -r -N "$clen" body <&4 || true   # read returns nonzero at EOF even on a full read
+  body="$(read_bytes "$clen")"
   if [[ "$(printf '%s' "$body" | jq -r '.method // empty')" == "textDocument/publishDiagnostics" ]]; then
     printf '%s\n' "$body" >> "$DIAGS"
     got_any=1
@@ -181,7 +195,7 @@ n_warn=$(jq -r '[.[][] | select(.severity == 2)] | length' "$BYURI")
 
 if [[ -n "$lines" ]]; then
   printf '%s\n\n' "$lines"
-  files=$(printf '%s\n' "$lines" | sed 's/:.*//' | sort -u | wc -l)
+  files=$(printf '%s\n' "$lines" | sed 's/:.*//' | sort -u | wc -l | tr -d ' ')
   echo "$n_err error(s), $n_warn warning(s) across $files file(s)."
 elif [[ "$got_any" -eq 0 ]]; then
   # Not a clean bill of health: the server never published a single diagnostic set, so

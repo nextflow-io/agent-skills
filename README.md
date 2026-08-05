@@ -19,7 +19,11 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 The plugin bundles a script that runs the official [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly and prints the diagnostics (errors and warnings) for a project:
 
 ```bash
+# from a checkout of this repo
 scripts/nextflow-typecheck.sh <project-dir>
+
+# from an installed plugin
+"${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh" <project-dir>
 ```
 
 Requires `jq` and Java 17+. The `migrate-nextflow-code` skill uses it to drive the static typing migration, since `nextflow lint` does not currently perform type checking.
