@@ -1,7 +1,7 @@
 ---
 description: Evaluate the migrate-nextflow-code skill
 argument-hint: <strict-syntax|topic-channels|static-typing|workflow-outputs> <github-url> [branch]
-allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill
+allowed-tools: Bash, Read, Edit, Write, Glob, Grep
 ---
 
 Evaluate the `migrate-nextflow-code` skill by attempting a real migration on a real Nextflow pipeline.

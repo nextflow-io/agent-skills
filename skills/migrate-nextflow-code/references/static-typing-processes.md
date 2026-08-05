@@ -121,7 +121,7 @@ The following is a working list of common substitutions (from real migrations, n
 | `string.split(sep)` | `string.tokenize(sep)` |
 | `string.split(/regex/)` | `string.replaceAll(/…/, '…').tokenize(sep)` |
 | `x.toString()` | `"${x}"` |
-| '"' + x + '"' | `"\"${x}\""`
+| `'"' + x + '"'` | `"\"${x}\""` |
 | `task.memory.giga` / `.mega` | `task.memory.toGiga()` / `toMega()` |
 
 Additional gotchas worth calling out:

@@ -36,8 +36,24 @@ if ! command -v java >/dev/null 2>&1; then
   exit 1
 fi
 
+# Check the major version up front: the jar requires Java 17+
+# Handles both the legacy `1.8.0_292` and the modern `17.0.9` / `21` forms.
+java_ver="$(java -version 2>&1 | sed -n 's/.*version "\([^"]*\)".*/\1/p' | head -n1 || true)"
+java_major="${java_ver%%[.-]*}"
+[ "$java_major" = "1" ] && java_major="$(printf '%s' "$java_ver" | cut -d. -f2)"
+case "$java_major" in
+  ''|*[!0-9]*) ;;  # unrecognized version string — let the JVM speak for itself
+  *)
+    if [ "$java_major" -lt 17 ]; then
+      log "Java 17+ is required to run the language server JAR (found Java ${java_ver})."
+      log "  Run the install-nextflow skill to install it."
+      exit 1
+    fi
+    ;;
+esac
+
 cache_dir="${HOME}/.nextflow/lsp/${PREFIX}"
-api="https://api.github.com/repos/nextflow-io/language-server/releases"
+api="https://api.github.com/repos/nextflow-io/language-server/releases?per_page=100"
 
 # Fetch the releases list (anonymous, or authenticated to dodge rate limits).
 releases=""
