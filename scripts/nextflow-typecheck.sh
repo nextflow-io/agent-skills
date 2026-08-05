@@ -20,6 +20,9 @@
 #
 # Usage:  nextflow-typecheck.sh [WORKSPACE_DIR]
 #
+# Env:    NEXTFLOW_TYPECHECK_IDLE     seconds of silence that end the scan (default 10)
+#         NEXTFLOW_TYPECHECK_TIMEOUT  seconds to wait for the first diagnostic (default 90)
+#
 # Requires: jq, plus the launcher's own deps (java 17+; curl or wget).
 # Network access on first run (to download the jar).
 
@@ -27,11 +30,13 @@ set -euo pipefail
 
 # Delegate server resolution/launch to the shared launcher.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$SCRIPT_DIR/..}"
-LAUNCHER="$PLUGIN_ROOT/scripts/nextflow-language-server.sh"
+LAUNCHER="$SCRIPT_DIR/nextflow-language-server.sh"
 
-IDLE=3            # seconds of silence that means "scan finished"
-FIRST_TIMEOUT=90  # seconds to wait for the first diagnostic before giving up
+# Completion is inferred from silence — the server publishes no "scan finished" notification.
+# A pause longer than IDLE mid-scan therefore truncates the results, so the idle window is
+# generous by default and overridable on very large projects.
+IDLE="${NEXTFLOW_TYPECHECK_IDLE:-10}"              # seconds of silence that means "scan finished"
+FIRST_TIMEOUT="${NEXTFLOW_TYPECHECK_TIMEOUT:-90}"  # seconds to wait for the first diagnostic
 
 WORKSPACE="."
 for arg in "$@"; do
@@ -62,7 +67,7 @@ mkfifo "$IN" "$OUT"
 JPID=$!
 
 cleanup() {
-  exec 3>&- 4<&- 2>/dev/null || true
+  { exec 3>&- 4<&-; } 2>/dev/null || true
   kill "$JPID" 2>/dev/null || true
   rm -rf "$WORKDIR"
 }
@@ -108,9 +113,9 @@ for d in ${EXCLUDES[@]+"${EXCLUDES[@]}"}; do
 done
 find_first() {  # $1 = filename pattern
   if [[ ${#prune[@]} -gt 0 ]]; then
-    find "$WS_ABS" \( "${prune[@]}" \) -prune -o -name "$1" -print 2>/dev/null | head -1
+    { find "$WS_ABS" \( "${prune[@]}" \) -prune -o -name "$1" -print 2>/dev/null || true; } | head -1
   else
-    find "$WS_ABS" -name "$1" -print 2>/dev/null | head -1
+    { find "$WS_ABS" -name "$1" -print 2>/dev/null || true; } | head -1
   fi
 }
 open_file() {  # $1 = path, $2 = languageId
@@ -178,12 +183,15 @@ if [[ -n "$lines" ]]; then
   printf '%s\n\n' "$lines"
   files=$(printf '%s\n' "$lines" | sed 's/:.*//' | sort -u | wc -l)
   echo "$n_err error(s), $n_warn warning(s) across $files file(s)."
-elif [[ "$got_any" -eq 0 && -s "$SERVER_LOG" ]]; then
-  echo "No diagnostics received; the language server may have failed to start:" >&2
-  sed 's/^/  /' "$SERVER_LOG" >&2
+elif [[ "$got_any" -eq 0 ]]; then
+  # Not a clean bill of health: the server never published a single diagnostic set, so
+  # nothing was actually checked (failed startup, or no response within FIRST_TIMEOUT).
+  echo "No diagnostics received in ${FIRST_TIMEOUT}s; the language server may have failed to start:" >&2
+  [[ -s "$SERVER_LOG" ]] && sed 's/^/  /' "$SERVER_LOG" >&2
   exit 1
 else
-  echo "No diagnostics. ✓"
+  # Report the file count so a scan the server silently narrowed is visible as a small number.
+  echo "No diagnostics. ✓ ($(jq -r 'length' "$BYURI") file(s) checked)"
 fi
 
 [[ "$n_err" -gt 0 ]] && exit 1 || exit 0

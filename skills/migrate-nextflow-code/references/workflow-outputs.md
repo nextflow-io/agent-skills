@@ -207,7 +207,7 @@ output {
 }
 ```
 
-It can replace a `collectFile` operation or a hand-rolled "create a samplesheet" process. However, such a refactor might not be trivial — flag any opportunities for  `index` refactoring as follow-up work.
+It can replace a `collectFile` operation or a hand-rolled "create a samplesheet" process. However, such a refactor might not be trivial — flag any opportunities for `index` refactoring as follow-up work.
 
 ## Critical rules for this migration
 

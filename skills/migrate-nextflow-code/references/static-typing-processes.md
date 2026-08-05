@@ -112,9 +112,9 @@ The following is a working list of common substitutions (from real migrations, n
 
 | Legacy pattern | Use instead |
 |----------------|-------------|
-| `list.flatten()` | `list.collectMany()` |
+| `list.flatten()` | `list.collectMany { v -> v }` |
 | `list.sort()` | `list.toSorted()` |
-| `list.unique()` | `list.toUnique()` |
+| `list.unique()` | `list.toUnique().toList()` |
 | `map.clone(); map << [k: v]` | `map += [k: v]` |
 | `map.putAll(other)` | `map + other` |
 | `map.remove(k)` | `map.subMap(map.keySet() - [k])` |

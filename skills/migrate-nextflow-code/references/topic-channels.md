@@ -150,4 +150,4 @@ nf-test test --update-snapshot
 
 1. **NEVER SEND THE CONSUMER'S OWN VERSIONS TO THE TOPIC** — any process that consumes `channel.topic('versions')` output (directly or indirectly) must not emit to that topic, or the pipeline deadlocks.
 2. **NEVER PUT `$(...)` OR A BARE `$` IN AN `eval()`** — Nextflow runs it inside a double-quoted `bash -c`, so the outer shell expands it first and the task fails with exit 127. Pipe directly instead of `echo $(...)`, and drop `$` anchors from sed expressions.
-4. **DELETE ALL THE PLUMBING** — a half-migrated pipeline that still threads `ch_versions` around while also using the topic will double-report versions.
+3. **DELETE ALL THE PLUMBING** — a half-migrated pipeline that still threads `ch_versions` around while also using the topic will double-report versions.

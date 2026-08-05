@@ -33,6 +33,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh <project-dir>
 
 It runs the language server headlessly over the whole project and prints one line per diagnostic, with the path relative to the project root. Exit code is 1 if any errors were found. Run it after each round of edits — it is the only way to see type errors.
 
+- It requires `jq` and Java 17+.
 - Some type mismatches are reported as errors while others are reported as warnings — make sure to check both.
 - The first run downloads the language server jar (~1 min); later runs reuse the cached jar. A full scan takes a few seconds to a minute depending on project size, so batch your edits rather than re-running it after every single change.
 
@@ -68,7 +69,7 @@ Some warnings are **out of scope for a static-typing migration** and may be left
 
 #### collectFile
 
-`collectFile` is not a typed operator (see the [operator list](static-typing-workflows.md#operators-under-typing)), so it warns under typing. It is handled by the **[workflow-outputs migration](workflow-outputs.md)**, which comes after this one — leave it for now.
+`collectFile` is not a typed operator (see the [operator list](static-typing-workflows.md#dataflow-logic)), so it warns under typing. It is handled by the **[workflow-outputs migration](workflow-outputs.md)**, which comes after this one — leave it for now.
 
 #### Process templates
 
@@ -93,5 +94,5 @@ You can use the cast (`as`) operator to coerce the type of an expression to sati
 1. **STRICT SYNTAX FIRST** — Static typing requires the v2 parser. Run `nextflow lint -o concise .` and resolve all strict-syntax errors (see [strict-syntax.md](strict-syntax.md)) before adding any types.
 2. **MIGRATE INCREMENTALLY** — Enable `nextflow.enable.types = true` per file, type the leaf modules first, then work up through subworkflows to the entry workflow. Fix type errors as you go.
 3. **MIGRATE TUPLES TO RECORDS** — Convert `tuple val(meta), path(...)` to records with named, typed fields. Use explicit record types as needed at component boundaries. Access fields by name, never by index.
-4. **MIGRATE LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, `groupTuple`, operator-form `splitCsv`, and capitalized `Channel.` factories per the [operator guidelines](static-typing-workflows.md#operators-under-typing).
+4. **MIGRATE LEGACY OPERATORS** — Replace `set`/`tap`, `.out`, `|`/`&`, `branch`, `multiMap`, `groupTuple`, operator-form `splitCsv`, and capitalized `Channel.` factories per the [operator guidelines](static-typing-workflows.md#dataflow-logic).
 5. **MIGRATE PARAMS** — Move script-used params into a typed `params {}` block alongside the entry workflow and propagate them as explicit inputs; do not use the global `params` object inside subworkflows/processes.

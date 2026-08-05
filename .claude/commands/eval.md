@@ -11,7 +11,7 @@ Arguments:
 - `$2` — GitHub URL of the pipeline to migrate (required)
 - `$3` — branch to check out (optional; default branch if omitted)
 
-If `$1` is not one of the three migrations above, stop and say so — do not guess.
+If `$1` is not one of the four migrations above, stop and say so — do not guess.
 
 Do this in order:
 
