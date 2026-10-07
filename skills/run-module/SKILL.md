@@ -10,7 +10,7 @@ Run modules from the [Nextflow Registry](https://registry.nextflow.io) natively 
 
 Modules are published under namespaces (e.g. `nf-core/fastqc`), and the `nextflow module` commands work with any of them.
 
-**Requires Nextflow 26.04 or later** (for the `nextflow module` commands). Workflow modules require **Nextflow 26.09.0-edge or later**.
+**Requires Nextflow 26.04 or later** (for the `nextflow module` commands). Workflow modules require **Nextflow 26.10 or later**.
 
 ### Process modules vs workflow modules
 
