@@ -17,17 +17,18 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 ## The four skills and how they relate
 
 - `install-nextflow` — installs/upgrades Nextflow and the Java 17+ prerequisite (via SDKMAN). Other skills require **Nextflow 26.04+**.
-- `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP).
+- `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP). Covers both process modules and workflow modules (`Kind: Workflow`).
 - `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
 - `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
 
-When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
+When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line (plus "26.09.0-edge or later" for workflow modules), the registry API `kind=Workflow` search snippet, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
 
 ## Conventions that recur across skills (preserve these when editing)
 
 - **Terminology**: modules come from the **Nextflow Registry**. `nf-core` is one *namespace* among many (e.g. `nf-core/fastqc`) — don't equate the Registry with nf-core.
 - **Never write wrapper workflows to test a single module** — `run-module` and `create-workflow` both forbid this emphatically. Use `nextflow module run` / `nextflow module view` instead. Don't soften this guidance.
 - **Module include syntax**: prefer Nextflow-managed includes (`from 'nf-core/module'`, no `./` prefix) over local file paths.
+- **Workflow modules**: registry modules are either process modules or workflow modules (subworkflows). `nextflow module search` rarely surfaces workflow modules, so skills query the registry API with `kind=Workflow`. Untyped workflow modules (most nf-core ones) cannot be run with `nextflow module run` — that is expected and is never a reason to write a wrapper workflow.
 - **Calendar versioning**: Nextflow uses `YY.MM.PATCH`, not semver — `26.04.0` is newer than `25.10.1`. Use `NXF_VER` to pin, `NXF_EDGE` for the edge channel.
 - Each skill ends with a numbered **Critical Rules** section that restates its non-negotiable behaviors; new behavioral requirements belong there.
 

@@ -10,7 +10,7 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 
 - [`install-nextflow`](./skills/install-nextflow) — Install or upgrade Nextflow (and Java 17+ via SDKMAN if needed)
 - [`create-workflow`](./skills/create-workflow) — Create Nextflow pipelines by composing modules from the Nextflow Registry
-- [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
+- [`run-module`](./skills/run-module) — Run Nextflow Registry modules (process and workflow modules) natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
 
 ## Installation
@@ -58,7 +58,7 @@ claude --plugin-dir /path/to/agent-skills
 ## Requirements
 
 - A coding agent that supports agent skills (e.g. Claude Code, Codex, Cursor)
-- [Nextflow](https://nextflow.io) **26.04 or later** (you can use the `install-nextflow` skill to install it)
+- [Nextflow](https://nextflow.io) **26.04 or later** (you can use the `install-nextflow` skill to install it); **26.09.0-edge or later** for workflow modules
 
 ## License
 

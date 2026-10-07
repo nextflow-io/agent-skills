@@ -23,7 +23,8 @@ If Nextflow is already installed:
 
 1. Read the installed version from `nextflow -version`.
 2. If the installed version is **older than 26.04**, the user MUST upgrade — other Nextflow skills depend on it.
-3. Otherwise, propose an upgrade only if a newer version is available.
+3. If the user needs **workflow modules** (registry modules with `Kind: Workflow`), the installed version must be **26.09.0-edge or later**. Until a stable release includes them, use the edge channel (`NXF_EDGE=1`) or pin with `NXF_VER` (see [Nextflow Versioning](#nextflow-versioning)).
+4. Otherwise, propose an upgrade only if a newer version is available.
 
 Run a self-update (it checks the latest release and updates if newer):
 
@@ -160,7 +161,7 @@ When the user asks to install or run a specific version, set `NXF_VER` rather th
 ## Critical Rules
 
 1. **CHECK FIRST** — always run `nextflow -version` before deciding to install or upgrade.
-2. **REQUIRE 26.04+** — other Nextflow skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version.
+2. **REQUIRE 26.04+** — other Nextflow skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version. Workflow modules require 26.09.0-edge or later.
 3. **VERIFY JAVA 17+** before installing Nextflow — install Java 21 via SDKMAN if missing or too old.
 4. **CONFIRM destructive actions** — ask the user before running `nextflow self-update`, installing SDKMAN, or moving the `nextflow` launcher to a system directory.
 5. **PREFER curl, FALL BACK to wget** — if neither is available, stop and ask the user to install one.
