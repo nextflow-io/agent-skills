@@ -21,7 +21,7 @@ Skills follow the [Agent Skills specification](https://agentskills.io/specificat
 - `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
 - `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
 
-When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line (plus "26.09.0-edge or later" for workflow modules), the registry API `kind=Workflow` search snippet, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
+When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line (plus "26.10 or later" for workflow modules), the registry API `kind=Workflow` search snippet, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
 
 ## Conventions that recur across skills (preserve these when editing)
 
