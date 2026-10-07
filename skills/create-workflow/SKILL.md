@@ -102,7 +102,7 @@ Only after ALL modules run successfully:
 
 3. **Run the complete workflow using the same test data** to validate end-to-end
 
-## Critical Guidelines
+## Guidelines
 
 ### Command Execution
 - Use `-resume` flag to leverage cached results when appropriate
@@ -158,3 +158,12 @@ Step 2: Wait for user agreement
 Step 3: Validate ALL modules ONE BY ONE with test data
 Step 4: Compose final workflow (only after Step 3 succeeds)
 ```
+
+## Critical Rules
+
+1. **PROPOSE A PLAN FIRST** — Present modules, sequence, and data flow, then wait for explicit user approval
+2. **VALIDATE EVERY MODULE** — Run each module with test data via `Skill(skill="run-module")`, one at a time
+3. **NEVER write wrapper workflows** to test a single module — not even when a module run fails
+4. **COMPOSE ONLY IN STEP 4** — after every module has been validated
+5. **Use Nextflow managed includes** — `from 'nf-core/module'`, no `./` prefix
+6. **Stop on failure** — Show the user the failing command and its output before trying something else

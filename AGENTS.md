@@ -1,49 +1,11 @@
 # AGENTS.md
 
-This file provides guidance to coding agents (Claude Code and other Agent Skills-compatible tools) when working with code in this repository.
+A Claude Code plugin of agent skills ([Agent Skills spec](https://agentskills.io/specification)) for building and running Nextflow pipelines with modules from the [Nextflow Registry](https://registry.nextflow.io). The deliverable is `skills/*/SKILL.md`; there is no build.
 
-## What this repo is
+- Load locally: `claude --plugin-dir .`
+- Type-check Nextflow code: `scripts/nextflow-typecheck.sh` (`nextflow lint` only checks syntax).
+- `.claude/commands/` is repo-local dev tooling (e.g. `/eval`), not shipped to plugin users.
+- Releasing: bump `version` in `.claude-plugin/plugin.json`.
+- After editing `.github/workflows/`, run `npx actions-up` and `zizmor`.
 
-A Claude Code plugin that bundles **agent skills** for building and running Nextflow pipelines with modules from the [Nextflow Registry](https://registry.nextflow.io). There is no application code, build step, or test suite — the deliverable is the set of `SKILL.md` files, each a Markdown document with YAML frontmatter that instructs an agent how to perform a task.
-
-Skills follow the [Agent Skills specification](https://agentskills.io/specification) so they work in any compatible agent (Claude Code, Codex, Cursor, OpenCode).
-
-## Layout
-
-- `.claude/commands/` — repo-local dev tooling, **not shipped to plugin users**. `eval.md` (`/eval <migration> <github-url> [branch]`) exercises a `migrate-nextflow-code` migration against a real pipeline and reports where the skill's instructions fall short.
-- `.claude-plugin/plugin.json` — plugin manifest (name, version, keywords). Bump `version` when releasing.
-- `scripts/nextflow-typecheck.sh` — drives the [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly and prints diagnostics for a project. This is how skills check for type errors; `nextflow lint` only checks syntax.
-- `skills/<name>/SKILL.md` — one skill per directory; the directory name must match the `name:` in frontmatter.
-- Skills may bundle resources: `references/*.md` (loaded on demand). Shared executable helpers live in the top-level `scripts/` (e.g. `scripts/nextflow-language-server.sh`), referenced from skills via `${CLAUDE_PLUGIN_ROOT}/scripts/...`.
-- `.mcp.json` — declares the [Seqera MCP](https://mcp.seqera.io/mcp) server, which allows the agent to interact with Seqera Platform.
-
-## The skills and how they relate
-
-- `install-nextflow` — installs/upgrades Nextflow and the Java 17+ prerequisite (via SDKMAN). Other skills require **Nextflow 26.04+**.
-- `run-module` — runs a single Registry module via `nextflow module search/view/run`. Self-contained (no MCP).
-- `create-workflow` — composes multiple modules into a pipeline. **Delegates to `run-module`** (via the `Skill` tool) to validate each module before composing.
-- `launch-workflow` — launches pipelines on Seqera Platform for cloud/HPC execution. **Requires the seqera MCP** (`mcp__seqera__*` tools) — declared in `allowed-tools`.
-- `migrate-nextflow-code` — migrates pipeline code to newer language features.
-
-When editing one skill, check the others for consistency: cross-references (the `Skill` delegation table in `create-workflow`), the shared "Nextflow 26.04+" requirement line, and the Wave+Conda `nextflow.config` block all appear in more than one file and must stay in sync.
-
-## Conventions that recur across skills (preserve these when editing)
-
-- **Terminology**: modules come from the **Nextflow Registry**. `nf-core` is one *namespace* among many (e.g. `nf-core/fastqc`) — don't equate the Registry with nf-core.
-- **Never write wrapper workflows to test a single module** — `run-module` and `create-workflow` both forbid this emphatically. Use `nextflow module run` / `nextflow module view` instead. Don't soften this guidance.
-- **Module include syntax**: prefer Nextflow-managed includes (`from 'nf-core/module'`, no `./` prefix) over local file paths.
-- **Calendar versioning**: Nextflow uses `YY.MM.PATCH`, not semver — `26.04.0` is newer than `25.10.1`. Use `NXF_VER` to pin, `NXF_EDGE` for the edge channel.
-- Each skill ends with a numbered **Critical Rules** section that restates its non-negotiable behaviors; new behavioral requirements belong there.
-
-## Editing skills
-
-- Frontmatter `description:` is the trigger text the agent matches against — it must clearly state *when* to invoke the skill. `allowed-tools:` gates which tools the skill may use; add a tool here before relying on it.
-- After editing GitHub Actions workflows (if any are added), run `npx actions-up` and `zizmor` to harden them.
-
-## Local testing
-
-```bash
-claude --plugin-dir /path/to/agent-skills
-```
-
-Loads the plugin without installing it from the marketplace.
+Before editing any skill, read [docs/editing-skills.md](docs/editing-skills.md).

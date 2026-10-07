@@ -141,18 +141,6 @@ nextflow module run nf-core/bwa/mem \
 
 5. **Process output** — Read the stdout, summarize key results, and suggest the logical next step to the user
 
-## Critical Rules
-
-1. **SEARCH FIRST** — Always use `nextflow module search` to find the right module
-2. **GET THE TEMPLATE** — Always run `nextflow module view` before running a module
-3. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
-4. **NEVER write wrapper workflows** — If a run fails, use `nextflow module view` to get correct args
-5. **NEVER guess parameters** — Always get them from the info template
-6. **Expand wildcards first** — Use `ls data/*.fq` then comma-separate results
-7. **Quote multi-file inputs** — `--input "file1,file2,file3"`
-8. **Use absolute paths** when possible
-9. **ALWAYS PROCESS STDOUT OUTPUT** — After a successful run, present a summary and suggest the logical next step
-
 ## When Module Run Fails
 
 **DO NOT write a wrapper workflow.** Instead:
@@ -176,3 +164,15 @@ The `nextflow module run` command prints its output to stdout. After a module ru
 Always frame next-step suggestions as questions to the user.
 
 Only list or inspect output files in the work directory if the module or user specifically requires it — do not do this by default.
+
+## Critical Rules
+
+1. **SEARCH FIRST** — Always use `nextflow module search` to find the right module
+2. **GET THE TEMPLATE** — Always run `nextflow module view` before running a module
+3. **SUBSTITUTE TEMPLATE VALUES** — Replace all placeholders with concrete values from the user's data
+4. **NEVER write wrapper workflows** — If a run fails, use `nextflow module view` to get correct args
+5. **NEVER guess parameters** — Always get them from the info template
+6. **Expand wildcards first** — Use `ls data/*.fq` then comma-separate results
+7. **Quote multi-file inputs** — `--input "file1,file2,file3"`
+8. **Use absolute paths** when possible
+9. **ALWAYS PROCESS STDOUT OUTPUT** — After a successful run, present a summary and suggest the logical next step
