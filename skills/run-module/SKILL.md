@@ -1,6 +1,6 @@
 ---
 name: run-module
-description: Run Nextflow Registry modules natively using `nextflow module` commands. Use when running, listing, or getting info about Nextflow modules.
+description: Run Nextflow Registry modules natively using `nextflow module` commands. Use when running, listing, or getting info about Nextflow modules, including process modules (a single tool) and workflow modules (subworkflows that chain several modules).
 allowed-tools: Bash, Read, Glob
 ---
 
@@ -10,7 +10,18 @@ Run modules from the [Nextflow Registry](https://registry.nextflow.io) natively 
 
 Modules are published under namespaces (e.g. `nf-core/fastqc`), and the `nextflow module` commands work with any of them.
 
-**Requires Nextflow 26.04 or later** (for the `nextflow module` commands).
+**Requires Nextflow 26.04 or later** (for the `nextflow module` commands). Workflow modules require **Nextflow 26.10 or later**.
+
+### Process modules vs workflow modules
+
+A module has a **kind**, reported as `Kind:` by `nextflow module search` and `nextflow module view`:
+
+| Kind | What it is | Example |
+|------|------------|---------|
+| `Process` | A single process wrapping one tool | `nf-core/star/align` |
+| `Workflow` | A named workflow (subworkflow) that chains several modules; its dependencies are installed with it | `nf-core/fastq_align_star` (STAR + samtools sort/index/stats) |
+
+Both kinds are searched, viewed, run, and included the same way. The differences are covered in [Finding Workflow Modules](#finding-workflow-modules) and [Running Workflow Modules](#running-workflow-modules).
 
 ## ⛔ NEVER WRITE WRAPPER WORKFLOWS
 
@@ -46,6 +57,17 @@ nextflow module search "variant calling"
 nextflow module search "BAM statistics"
 ```
 
+### Finding Workflow Modules
+
+`nextflow module search` ranks workflow modules below process modules, so they rarely show up in its results. When the task spans several steps (e.g. "align with STAR then sort and index"), also query the registry API with the `kind=Workflow` filter:
+
+```bash
+curl -s "https://registry.nextflow.io/api/v1/modules?query=align%20reads%20STAR&kind=Workflow&limit=10" \
+  | python3 -c 'import json,sys; [print(r["name"], "-", r["description"]) for r in json.load(sys.stdin)["results"]]'
+```
+
+URL-encode spaces in `query` as `%20`. Then inspect any match with `nextflow module view`.
+
 ## Step 2: Get Module Info and Run Template
 
 Once you've identified the module, get its detailed info and the command template:
@@ -54,7 +76,9 @@ Once you've identified the module, get its detailed info and the command templat
 nextflow module view nf-core/fastqc
 ```
 
-This returns the module description, inputs, parameters, and the exact run command template. Use this template as the basis for your run command.
+This returns the module kind, description, inputs, parameters, and the exact run command template. Use this template as the basis for your run command.
+
+For a workflow module, the inputs are the workflow's `take:` declarations (in call order) and the outputs are its `emit:` declarations.
 
 ## Step 3: Substitute Template Values and Run
 
@@ -78,6 +102,20 @@ docker.enabled = true
 
 This avoids the need to manually build or pull container images — Wave provisions them from the module's declared conda dependencies.
 
+### Running Workflow Modules
+
+A workflow module runs with the same `nextflow module run` command, with these differences:
+
+- **It must be typed.** Only workflow modules with typed `take:` inputs can be run directly. Most nf-core workflow modules are untyped and fail with:
+  ```
+  Workflow `FASTQ_ALIGN_STAR` cannot be executed directly because it is not typed
+  ```
+  `nextflow module view` still prints a usage template for untyped workflow modules, so this error is the signal. The failed run has already installed the module and its dependencies under `./modules/`. It is **not** a missing-argument problem and **not** a reason to write a wrapper workflow. When invoked from `create-workflow` Step 3, follow that skill's instruction (defer to its Step 4). Otherwise, stop and tell the user the workflow module cannot be run on its own, then offer:
+  - running its constituent process modules one by one with `nextflow module run`. They are listed under `requires.modules` in `./modules/<namespace>/<name>/meta.yml`, and any listed workflow module has its own nested `meta.yml` to expand. Or
+  - using it inside a pipeline via the `create-workflow` skill.
+- **Channel inputs take a samplesheet.** A `Channel<...>` input accepts a CSV, JSON, or YAML samplesheet path; each row becomes one channel item. A `Value<...>` input accepts a single value (e.g. a file path).
+- **Outputs are not published.** Each emitted output is reported with its work directory path; nothing is copied to `--outdir`.
+
 ## Commands Reference
 
 | Command | Description |
@@ -85,7 +123,7 @@ This avoids the need to manually build or pull container images — Wave provisi
 | `nextflow module search <term>` | Similarity search by name/description/feature |
 | `nextflow module view <name>` | Detailed info about the module and how to run it |
 | `nextflow module run <name> [options]` | Run a module (installed on-the-fly) |
-| `nextflow module list` | List available modules |
+| `nextflow module list` | List installed modules with their version and kind |
 
 ## Examples
 
@@ -152,6 +190,8 @@ nextflow module run nf-core/bwa/mem \
 7. **Quote multi-file inputs** — `--input "file1,file2,file3"`
 8. **Use absolute paths** when possible
 9. **ALWAYS PROCESS STDOUT OUTPUT** — After a successful run, present a summary and suggest the logical next step
+10. **CHECK THE KIND** — `nextflow module view` reports `Kind: Process` or `Kind: Workflow`; for multi-step tasks, also look for workflow modules via the registry API `kind=Workflow` filter
+11. **UNTYPED WORKFLOW MODULES CANNOT RUN DIRECTLY** — on "cannot be executed directly because it is not typed", stop and offer the alternatives in [Running Workflow Modules](#running-workflow-modules); never write a wrapper workflow
 
 ## When Module Run Fails
 
