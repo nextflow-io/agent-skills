@@ -13,7 +13,7 @@ Create complete Nextflow workflows by composing validated modules from the [Next
 
 Modules are published under namespaces (e.g. `nf-core/fastqc`), and these skills compose modules from any of them.
 
-**Requires Nextflow 26.04 or later** (for the `nextflow module` commands used during validation). Including workflow modules requires **Nextflow 26.09.0-edge or later**.
+**Requires Nextflow 26.04 or later** (for the `nextflow module` commands used during validation). Including workflow modules requires **Nextflow 26.10 or later**.
 
 Registry modules come in two kinds (shown as `Kind:` by `nextflow module view`):
 - **Process modules** — one tool, e.g. `nf-core/star/align`
