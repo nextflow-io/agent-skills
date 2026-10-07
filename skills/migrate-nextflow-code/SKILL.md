@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Migrate Nextflow Code
 
-Migrate Nextflow a pipeline to new language patterns. Follow best practices from the Nextflow docs. Use `nextflow lint` to validate code as you go. Verify that the pipeline produces the same results before/after migration.
+Migrate a Nextflow pipeline to new language patterns. Follow best practices from the Nextflow docs. Use `nextflow lint` to validate code as you go. Verify that the pipeline produces the same results before/after migration.
 
 ## Requirements
 
@@ -76,7 +76,7 @@ Rules:
 - If the pipeline uses the `nf-schema` plugin, update it to version 2.7.2 or later to avoid runtime issues with static typing.
 - Params used by the script must be declared in the script. Params that only affect config settings should be declared in the config file. Config can override script param defaults, but ideally in a profile (e.g. `test`).
 - The global `params` record should only be used in the entry workflow. Pass params to processes and workflows as explicit inputs. Bundle related params into a single workflow input with a record type (e.g. `workflow ALIGNER` -> `record AlignerParams`) so that you can pass `params` directly from the entry workflow.
-- Do not use type coercion (`x as Type`) to circumvent the type checker. Use it only when the type is genuinely unknown, such as `channel.topic()`.
+- Use type coercion (`x as Type`) only when the type is genuinely unknown, such as `channel.topic()`.
 
 Reference:
 - [Static typing](https://raw.githubusercontent.com/nextflow-io/nextflow/master/docs/static-typing.mdx)
@@ -124,9 +124,7 @@ If the pipeline hasn't been migrated to static typing, or doesn't have the `para
 
 4. Check for process configuration (`conf/modules`, `ext.args`, `withName`). Refactor it by moving it into pipeline code (see below).
 
-5. Write a minimal example showing how to call the pipeline like a named workflow (`workflow as RNASEQ` -> `params as RnaseqParams` -> `RNASEQ(params.rnaseq)`). Flag any remaining issues from the above checks that you were not able to eliminate.
-
-The biggest issue you will likely encounter is `ext` config. nf-core modules use `ext` for certain inputs such as tool args and filename prefix/suffix. Users can then override these settings easily from config. A pipeline may specific its own defaults in config with process selectors. This makes the pipeline harder to compose.
+The biggest issue you will likely encounter is `ext` config. nf-core modules use `ext` for certain inputs such as tool args and filename prefix/suffix. Users can then override these settings easily from config. A pipeline may specify its own defaults in config with process selectors. This makes the pipeline harder to compose.
 
 The solution is to refactor the pipeline's `ext` config as pipeline code:
 - Modules take `args` / `prefix` / `suffix` as explicit inputs and resolve them as `task.ext.<name> ?: <input> ?: <default>`. Users can still override any tool at runtime with config.
@@ -148,6 +146,6 @@ After each migration, verify behavior against baseline using the project's test 
 
 ## Critical Rules
 
-1. **Read the docs.** Consult the linked docs when you aren't sure how to do something.
-2. **Preserve behavior.** The pipeline should produce the same outputs before/after the migration.
-3. **Verify.** Use the project's tests to confirm behavior is unchanged before finishing the migration.
+1. **One migration at a time.** Finish one migration before starting another one.
+2. **Read the docs.** Consult the linked docs when you aren't sure how to do something.
+3. **Preserve behavior.** The pipeline should produce the same outputs before/after the migration.
