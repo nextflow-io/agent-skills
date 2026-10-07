@@ -161,7 +161,7 @@ When the user asks to install or run a specific version, set `NXF_VER` rather th
 ## Critical Rules
 
 1. **CHECK FIRST** — always run `nextflow -version` before deciding to install or upgrade.
-2. **REQUIRE 26.04+** — other Nextflow skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version. Workflow modules require 26.09.0-edge or later.
+2. **REQUIRE 26.04+** — other Nextflow skills depend on `nextflow module`, `nextflow auth`, and `nextflow launch`, which require this version. Workflow modules require 26.10 or later.
 3. **VERIFY JAVA 17+** before installing Nextflow — install Java 21 via SDKMAN if missing or too old.
 4. **CONFIRM destructive actions** — ask the user before running `nextflow self-update`, installing SDKMAN, or moving the `nextflow` launcher to a system directory.
 5. **PREFER curl, FALL BACK to wget** — if neither is available, stop and ask the user to install one.
