@@ -58,7 +58,7 @@ claude --plugin-dir /path/to/agent-skills
 ## Requirements
 
 - A coding agent that supports agent skills (e.g. Claude Code, Codex, Cursor)
-- [Nextflow](https://nextflow.io) **26.04 or later** (you can use the `install-nextflow` skill to install it); **26.09.0-edge or later** for workflow modules
+- [Nextflow](https://nextflow.io) **26.04 or later** (you can use the `install-nextflow` skill to install it); **26.10 or later** for workflow modules
 
 ## License
 
