@@ -12,21 +12,7 @@ These skills follow the [Agent Skills](https://agentskills.io/specification) spe
 - [`create-workflow`](./skills/create-workflow) — Create Nextflow pipelines by composing modules from the Nextflow Registry
 - [`run-module`](./skills/run-module) — Run Nextflow Registry modules natively using the `nextflow module` command
 - [`launch-workflow`](./skills/launch-workflow) — Launch pipeline executions on Seqera Platform
-- [`migrate-nextflow-code`](./skills/migrate-nextflow-code) — Migrate pipeline code to newer language requirements (currently: strict syntax, topic channels, static typing, and workflow outputs)
-
-## Language server
-
-The plugin bundles a script that runs the official [Nextflow language server](https://github.com/nextflow-io/language-server) headlessly and prints the diagnostics (errors and warnings) for a project:
-
-```bash
-# from a checkout of this repo
-scripts/nextflow-typecheck.sh <project-dir>
-
-# from an installed plugin
-"${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh" <project-dir>
-```
-
-Requires `jq` and Java 17+. The `migrate-nextflow-code` skill uses it to drive the static typing migration, since `nextflow lint` does not currently perform type checking.
+- [`migrate-nextflow-code`](./skills/migrate-nextflow-code) — Migrate pipeline code to new language features
 
 ## Installation
 

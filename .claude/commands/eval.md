@@ -1,26 +1,20 @@
 ---
 description: Evaluate the migrate-nextflow-code skill
-argument-hint: <strict-syntax|topic-channels|static-typing|workflow-outputs> <github-url> [branch]
+argument-hint: <github-url> [branch] <description>
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep
 ---
 
-Evaluate the `migrate-nextflow-code` skill by attempting a real migration on a real Nextflow pipeline.
+Clone a Nextflow pipeline. Have a subagent migrate it using the `/migrate-nextflow-code` skill and report back on its experience with the skill.
 
 Arguments:
-- `$1` — which migration to evaluate: one of `strict-syntax`, `topic-channels`, `static-typing`, `workflow-outputs` (required)
-- `$2` — GitHub URL of the pipeline to migrate (required)
-- `$3` — branch to check out (optional; default branch if omitted)
+- `$1` — GitHub URL of the pipeline to migrate (required)
+- `$2` — branch to check out (optional)
+- `$3` — description of the migration to perform (required)
 
-If `$1` is not one of the four migrations above, stop and say so — do not guess.
+Procedure:
 
-Do this in order:
+1. Clone the pipeline repository into the `evals` directory as `evals/<name>-<NNN>`, where `NNN` is zero-padded increment to distinguish between repeated runs on the same pipeline. If a branch is not given, use the `dev` branch if the project has one, otherwise the default branch.
 
-1. **Read the skill.** Read `skills/migrate-nextflow-code/SKILL.md`, then the reference file for the `$1` migration. Follow that procedure — do not improvise your own migration steps.
+2. Prompt a subagent with the repo, the skill, and the migration to perform.
 
-2. **Clone into `evals/`.** Clone the repository as `evals/<name>` (add `--branch $3` if a branch was given). If `evals/<name>` already exists, stop and ask whether to reuse it or re-clone — do not silently overwrite. Change into the directory.
-
-3. **Run the `$1` migration.** Perform the `$1` migration on `evals/<name>`.
-
-4. **Report the outcome.** When done (or blocked), summarize as an eval result:
-   - how far the migration got;
-   - anything the skill's instructions didn't cover or got wrong, and any point where a tool's output was stale, missing, or misleading.
+3. Have the agent report on its experience using the skill: how the migration went, what external resources it used, what worked or didn't work, etc. The agent should write a detailed `REPORT.md` to the repository, with inline code snippets as needed to explain issues. Offer to ask the agent follow-up questions if you have the tools to do so.
