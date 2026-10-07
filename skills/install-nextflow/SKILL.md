@@ -23,7 +23,7 @@ If Nextflow is already installed:
 
 1. Read the installed version from `nextflow -version`.
 2. If the installed version is **older than 26.04**, the user MUST upgrade — other Nextflow skills depend on it.
-3. If the user needs **workflow modules** (registry modules with `Kind: Workflow`), the installed version must be **26.09.0-edge or later**. Until a stable release includes them, use the edge channel (`NXF_EDGE=1`) or pin with `NXF_VER` (see [Nextflow Versioning](#nextflow-versioning)).
+3. If the user needs **workflow modules** (registry modules with `Kind: Workflow`), the installed version must be **26.10 or later**.
 4. Otherwise, propose an upgrade only if a newer version is available.
 
 Run a self-update (it checks the latest release and updates if newer):
