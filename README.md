@@ -39,6 +39,37 @@ Requires `jq` and Java 17+. The `migrate-nextflow-code` skill uses it to drive t
 
 When prompted, approve the Seqera MCP server connection to enable the skills. Claude Code automatically keeps your skills up to date.
 
+### Codex
+
+Codex loads skills from `~/.agents/skills` (available in every project) or `.agents/skills` inside a repository (available in that repository only). The easiest way to install is with the [GitHub CLI](#github-cli), choosing Codex as the target agent.
+
+To install manually, clone this repo and symlink the skills into place:
+
+```bash
+git clone https://github.com/nextflow-io/agent-skills.git ~/agent-skills
+mkdir -p ~/.agents/skills
+ln -s ~/agent-skills/skills/* ~/.agents/skills/
+```
+
+To pick up new versions later, run `git pull` in `~/agent-skills`.
+
+You can also ask the built-in skill installer to fetch a single skill from inside a Codex session:
+
+```
+$skill-installer install https://github.com/nextflow-io/agent-skills/tree/master/skills/create-workflow
+```
+
+Codex detects new skills automatically. If one doesn't show up, restart Codex.
+
+`launch-workflow` needs the Seqera MCP server. Add it to Codex and sign in:
+
+```bash
+codex mcp add seqera --url https://mcp.seqera.io/mcp
+codex mcp login seqera
+```
+
+The type-checking script used by `migrate-nextflow-code` lives in this repo's `scripts/` directory. When the skill references `${CLAUDE_PLUGIN_ROOT}/scripts/nextflow-typecheck.sh`, use `~/agent-skills/scripts/nextflow-typecheck.sh` instead.
+
 ### GitHub CLI
 
 If you use the [GitHub CLI](https://cli.github.com/) (v2.90.0+), you can install skills with [`gh skill`](https://github.blog/changelog/2026-04-16-manage-agent-skills-with-github-cli/):
