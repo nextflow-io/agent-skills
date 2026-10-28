@@ -1,5 +1,19 @@
 # Nextflow Agent Skills
 
+> [!IMPORTANT]
+> This repository is archived. The skills have moved to [seqeralabs/nextflow-plugin](https://github.com/seqeralabs/nextflow-plugin).
+>
+> If you installed the plugin from this repository, uninstall it and install the new one:
+>
+> ```
+> /plugin uninstall nextflow@nextflow-io-agent-skills
+> /plugin marketplace remove nextflow-io-agent-skills
+> /plugin marketplace add seqeralabs/nextflow-plugin
+> /plugin install nextflow@nextflow-plugin
+> ```
+>
+> To install just the skills, use `npx skills add seqeralabs/nextflow-plugin` or `gh skill install seqeralabs/nextflow-plugin`.
+
 Agent skills for building and running Nextflow pipelines with modules from the [Nextflow Registry](https://registry.nextflow.io).
 
 The Nextflow Registry is the central place to discover and share Nextflow modules and plugins. Modules are published under namespaces — [nf-core](https://nf-co.re) is the most prominent — and these skills work with modules from any of them.
